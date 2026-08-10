@@ -1,0 +1,41 @@
+{
+    "name": "ApexionGame.Entities.Stats",
+    "rootNamespace": "ApexionGame.Entities.Stats",
+    "references": [
+        "AnnulusGames.UnityCodeGen.Editor",
+        "EncosyTower.Core",
+        "Unity.Burst",
+        "Unity.Collections",
+        "Unity.Mathematics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.annulusgames.unity-codegen",
+            "expression": "",
+            "define": "ANNULUS_CODEGEN"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "UNITY_BURST"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "UNITY_COLLECTIONS"
+        },
+        {
+            "name": "com.unity.mathematics",
+            "expression": "",
+            "define": "UNITY_MATHEMATICS"
+        }
+    ],
+    "noEngineReferences": false
+}

@@ -1,0 +1,30 @@
+{
+    "name": "ApexionGame.Entities.Stats.Authoring",
+    "rootNamespace": "ApexionGame.Entities.Stats.Authoring",
+    "references": [
+        "ApexionGame.Entities.Stats",
+        "EncosyTower.Core",
+        "Unity.Collections",
+        "Unity.Mathematics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "UNITY_COLLECTIONS"
+        },
+        {
+            "name": "com.unity.mathematics",
+            "expression": "",
+            "define": "UNITY_MATHEMATICS"
+        }
+    ],
+    "noEngineReferences": false
+}

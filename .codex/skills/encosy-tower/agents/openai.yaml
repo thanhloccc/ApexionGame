@@ -1,0 +1,4 @@
+interface:
+  display_name: "EncosyTower Project Workflow"
+  short_description: "Build Unity features with EncosyTower contracts"
+  default_prompt: "Use $encosy-tower to implement this Unity feature with the correct modules, structured Result errors, and project validation workflow."

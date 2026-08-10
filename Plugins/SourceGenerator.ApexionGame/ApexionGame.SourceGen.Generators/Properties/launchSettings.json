@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ApexionGame.SourceGen.Generators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../Samples/Samples.Entities.Stats/Samples.Entities.Stats.csproj"
+    }
+  }
+}

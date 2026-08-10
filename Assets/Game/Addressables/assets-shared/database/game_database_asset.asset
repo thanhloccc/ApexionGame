@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea2970a9a7275b74eaf5b4926753aa0e, type: 3}
+  m_Name: game_database_asset
+  m_EditorClassIdentifier: EncosyTower.Core::EncosyTower.Databases.DatabaseAsset
+  _tables:
+  - {fileID: 11400000, guid: b8bbfe9c16eb36d4fa36a5ed541db578, type: 2}
+  - {fileID: 11400000, guid: 6fbc035b3024efc4d9fe2e3de174ae42, type: 2}
+  - {fileID: 11400000, guid: a5256c941f44db44c8edf3c99065948c, type: 2}
+  - {fileID: 11400000, guid: 4622831de9ba85e4595f092ff4cb1bac, type: 2}
+  - {fileID: 11400000, guid: 54f003dadef4c7644b9d8c73457b2393, type: 2}
+  - {fileID: 11400000, guid: 5a969aa5baef2be4eb4f13703ab813e4, type: 2}
+  - {fileID: 11400000, guid: 889592e0fe14e634bad72632c36f28bc, type: 2}
+  - {fileID: 11400000, guid: ebe25796aa34f86408ddf59767fb9a03, type: 2}
+  - {fileID: 11400000, guid: 448978c6c2729344f8c6362e6a1fb4ad, type: 2}
+  - {fileID: 11400000, guid: 4be9b544f36a5054a81ab8e9c670446c, type: 2}
+  _redundantTabless: []

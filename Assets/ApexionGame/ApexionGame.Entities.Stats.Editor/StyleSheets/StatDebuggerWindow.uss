@@ -1,0 +1,581 @@
+/* Shape only. Every colour is a variable defined in _Dark.uss / _Light.uss. */
+
+.stat-debugger {
+    flex-grow: 1;
+}
+
+/* ---- toolbar ----------------------------------------------------------------------------- */
+
+.stat-debugger__toolbar {
+    flex-direction: row;
+    align-items: center;
+    height: 28px;
+    padding: 0 8px;
+    border-bottom-width: 2px;
+    border-color: var(--stat-debugger-border);
+    background-color: var(--stat-debugger-chrome);
+}
+
+.stat-debugger__toolbar-field {
+    width: 240px;
+    margin: 0;
+}
+
+/*
+    background-image: none is load-bearing here, not decoration: Unity's built-in popup-field skin
+    paints its own background texture, and on hover that texture swaps to a near-white highlight
+    baked for the default light-grey editor chrome. Our background-color alone sat *under* that
+    image, so hovering the store dropdown flashed white. Clearing the image is what actually fixes
+    it — the colour override was never enough by itself. Same story for every other control below.
+*/
+.stat-debugger__toolbar-field > .unity-base-popup-field__input {
+    background-image: none;
+    color: var(--stat-debugger-text);
+    background-color: var(--stat-debugger-input-bg);
+    border-width: 1px;
+    border-color: var(--stat-debugger-input-border);
+    border-radius: 3px;
+}
+
+/* Only the border changes — background-image: none above is what actually fixed the flash, so
+   hover/focus do not need to fight the base background-color too. */
+.stat-debugger__toolbar-field > .unity-base-popup-field__input:hover,
+.stat-debugger__toolbar-field > .unity-base-popup-field__input:focus {
+    border-color: var(--stat-debugger-focus);
+}
+
+.stat-debugger__toolbar-info {
+    margin-left: 12px;
+    font-size: 11px;
+    color: var(--stat-debugger-text);
+}
+
+.stat-debugger__toolbar-spacer {
+    flex-grow: 1;
+}
+
+.stat-debugger__toolbar-toggle {
+    margin: 0;
+}
+
+.stat-debugger__toolbar-toggle-label {
+    margin: 0 8px 0 3px;
+    font-size: 11px;
+    color: var(--stat-debugger-muted);
+}
+
+/* Toggle checkbox chrome (shared by the toolbar Auto toggle and the section Modified-only
+   toggle): the default skin nearly disappears against our dark chrome without an explicit box. */
+.stat-debugger__toolbar-toggle .unity-toggle__checkmark,
+.stat-debugger__section-toggle .unity-toggle__checkmark {
+    background-image: none;
+    border-width: 1px;
+    border-radius: 2px;
+    border-color: var(--stat-debugger-input-border);
+    background-color: var(--stat-debugger-input-bg);
+}
+
+.stat-debugger__toolbar-toggle .unity-toggle__checkmark:hover,
+.stat-debugger__section-toggle .unity-toggle__checkmark:hover {
+    border-color: var(--stat-debugger-focus);
+}
+
+/* Buttons (Refresh, and the graph's zoom/Fit buttons) need their own visible chrome, not just
+   text sitting on the toolbar background, or they read as disabled. */
+.stat-debugger__toolbar-button,
+.stat-graph__toolbar-zoom-button {
+    background-image: none;
+    background-color: var(--stat-debugger-button-bg);
+    border-width: 1px;
+    border-radius: 3px;
+    border-color: var(--stat-debugger-button-border);
+    color: var(--stat-debugger-text);
+}
+
+/* Border colour only, on purpose — swapping the whole button's fill on hover/press read as
+   noisier than it needed to be; the border alone is enough to say "this is interactive". */
+.stat-debugger__toolbar-button:hover,
+.stat-graph__toolbar-zoom-button:hover,
+.stat-debugger__toolbar-button:active,
+.stat-graph__toolbar-zoom-button:active {
+    border-color: var(--stat-debugger-focus);
+}
+
+.stat-debugger__toolbar-button {
+    min-width: 62px;
+    margin: 0;
+}
+
+/* Loud on purpose: it only appears when the loop check has failed. */
+.stat-debugger__warning {
+    padding: 8px 12px;
+    white-space: normal;
+    -unity-font-style: bold;
+    color: var(--stat-debugger-danger-text);
+    background-color: var(--stat-debugger-danger-bg);
+    border-bottom-width: 1px;
+    border-color: var(--stat-debugger-danger-text);
+}
+
+.stat-debugger__empty {
+    padding: 28px 32px;
+    white-space: normal;
+    font-size: 12px;
+    color: var(--stat-debugger-muted);
+}
+
+/* ---- body -------------------------------------------------------------------------------- */
+
+.stat-debugger__body {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.stat-debugger__owners {
+    width: 172px;
+    min-width: 172px;
+    border-right-width: 2px;
+    border-color: var(--stat-debugger-border);
+    background-color: var(--stat-debugger-chrome);
+}
+
+/*
+    Distinct from --stat-debugger-chrome (used by every header/toolbar bar) so the *content* of a
+    panel — the owner list, the stats rows, the graph canvas — reads as its own zone instead of
+    the whole window being one flat shade of grey with only 1-2px lines between areas.
+*/
+.stat-debugger__owners-list {
+    flex-grow: 1;
+    background-color: var(--stat-debugger-content-bg);
+}
+
+.stat-debugger__owners-list .unity-list-view__item {
+    background-image: none;
+    padding-left: 12px;
+    -unity-text-align: middle-left;
+    font-size: 11px;
+    color: var(--stat-debugger-text);
+}
+
+.stat-debugger__owners-list .unity-list-view__item:hover {
+    background-image: none;
+    background-color: var(--stat-debugger-row-hover);
+}
+
+.stat-debugger__owners-list .unity-collection-view__item--selected {
+    background-image: none;
+    background-color: var(--stat-debugger-selection);
+}
+
+.stat-debugger__detail {
+    flex-grow: 1;
+}
+
+/* ---- section headers --------------------------------------------------------------------- */
+
+.stat-debugger__section {
+    flex-grow: 1;
+    min-height: 64px;
+}
+
+/*
+    One row shared by Owners/Stats/Graph: a title plus whatever controls that section needs
+    (search field, modified-only toggle, summary count). Split from the title itself so a
+    title-only section (the graph) still gets the same chrome bar.
+*/
+.stat-debugger__section-header,
+.stat-debugger__owners-header {
+    flex-direction: row;
+    align-items: center;
+    height: 28px;
+    padding: 0 8px;
+    background-color: var(--stat-debugger-chrome);
+    border-bottom-width: 2px;
+    border-color: var(--stat-debugger-border);
+}
+
+.stat-debugger__section-title,
+.stat-debugger__owners-title {
+    padding-right: 4px;
+    -unity-text-align: middle-left;
+    -unity-font-style: bold;
+    font-size: 10px;
+    color: var(--stat-debugger-muted);
+    white-space: nowrap;
+}
+
+/*
+    Grows to fill whatever room its header has instead of a fixed width: the owners header is
+    only 172px wide in total, while the stats header spans the whole window.
+*/
+.stat-debugger__section-search {
+    flex-grow: 1;
+    min-width: 46px;
+    max-width: 160px;
+    margin: 0 6px;
+}
+
+.stat-debugger__section-search > .unity-text-field__input {
+    background-image: none;
+    background-color: var(--stat-debugger-input-bg);
+    border-width: 1px;
+    border-radius: 3px;
+    border-color: var(--stat-debugger-input-border);
+    color: var(--stat-debugger-text);
+    padding: 0 4px;
+}
+
+.stat-debugger__section-search > .unity-text-field__input:hover,
+.stat-debugger__section-search > .unity-text-field__input:focus {
+    border-color: var(--stat-debugger-focus);
+}
+
+.stat-debugger__section-toggle {
+    margin: 0;
+}
+
+.stat-debugger__section-toggle-label {
+    margin: 0 8px 0 3px;
+    font-size: 10px;
+    white-space: nowrap;
+    color: var(--stat-debugger-muted);
+}
+
+.stat-debugger__section-spacer {
+    flex-grow: 1;
+}
+
+.stat-debugger__section-summary {
+    font-size: 10px;
+    white-space: nowrap;
+    -unity-text-align: middle-right;
+    color: var(--stat-debugger-muted);
+}
+
+/* ---- stats table ------------------------------------------------------------------------- */
+
+/* border-bottom marks the boundary with the graph pane below — otherwise the split between the
+   two panes has nothing but the (barely visible) drag handle to show where one stops. */
+.stat-debugger__stats {
+    flex-grow: 1;
+    background-color: var(--stat-debugger-content-bg);
+    border-bottom-width: 2px;
+    border-color: var(--stat-debugger-border);
+}
+
+/* Every row gets a hairline under it — alternating shades alone were not read as a grid. */
+.stat-debugger__row {
+    flex-direction: row;
+    height: 21px;
+    padding-left: 10px;
+    padding-right: 14px;
+    border-left-width: 2px;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--stat-debugger-header-bg);
+}
+
+.stat-debugger__row:hover {
+    background-color: var(--stat-debugger-row-hover);
+}
+
+.stat-debugger__row--even {
+    background-color: var(--stat-debugger-row-alt);
+}
+
+.stat-debugger__row--header {
+    height: 22px;
+    -unity-font-style: bold;
+    font-size: 10px;
+    background-color: var(--stat-debugger-header-bg);
+    border-bottom-width: 1px;
+    border-color: var(--stat-debugger-border);
+}
+
+.stat-debugger__row--header:hover {
+    background-color: var(--stat-debugger-header-bg);
+}
+
+.stat-debugger__row--header .stat-debugger__cell {
+    color: var(--stat-debugger-muted);
+}
+
+/* The one thing worth spotting at a glance: modifiers moved this value off its base. */
+.stat-debugger__row--modified {
+    border-left-color: var(--stat-debugger-accent);
+}
+
+/*
+    Declared after --even/:hover so a selected row's background always wins over either. Amber,
+    not the blue used for --modified — otherwise a selected *and* modified row looks identical to
+    a merely modified one.
+*/
+.stat-debugger__row--selected {
+    background-color: var(--stat-debugger-focus-bg);
+}
+
+/*
+    Every cell clips. Without this a float4 prints as `float4(1f, 2f, 3f, 4f)` and simply draws
+    over its neighbours — which is exactly what the first version did.
+*/
+.stat-debugger__cell {
+    -unity-text-align: middle-right;
+    font-size: 11px;
+    color: var(--stat-debugger-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 10px;
+}
+
+/*
+    The row itself already stretches to the section's full width (default cross-axis stretch in a
+    vertical ScrollView) — but with every cell a fixed `width`, the cells summed to less than that
+    on a wide window (dead space to the right) and a stat *name* like "MoveSpeed" or "Attack"
+    truncated in a column sized for "#12". id/value now use min-width + flex-grow so they absorb
+    whatever room the window actually has; count/data/flag stay fixed-size since "0"/"on"/"off"
+    never needs more than their column already gives them.
+*/
+.stat-debugger__cell--id {
+    min-width: 92px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    -unity-text-align: middle-left;
+    color: var(--stat-debugger-muted);
+}
+
+.stat-debugger__cell--value {
+    min-width: 110px;
+    flex-grow: 2;
+    flex-shrink: 1;
+}
+
+.stat-debugger__cell--count {
+    width: 54px;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.stat-debugger__cell--data {
+    width: 78px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    color: var(--stat-debugger-muted);
+}
+
+.stat-debugger__cell--flag {
+    width: 56px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    color: var(--stat-debugger-muted);
+}
+
+.stat-debugger__row--modified .stat-debugger__cell--value {
+    color: var(--stat-debugger-accent);
+    -unity-font-style: bold;
+}
+
+/*
+    Header-only: click to sort. The cursor + tooltip say so, hover gives a visible background
+    instead of just a colour change, and the active column turns solid accent with a directional
+    arrow. Deliberately no glyph appended to every column's text (tried that; on the narrow count
+    columns it was just enough width to ellipsize "mods"/"obs"/"userData"/"events").
+*/
+.stat-debugger__cell--sortable {
+    cursor: link;
+}
+
+.stat-debugger__cell--sortable:hover {
+    color: var(--stat-debugger-text);
+    background-color: var(--stat-debugger-row-hover);
+}
+
+.stat-debugger__cell--sorted {
+    color: var(--stat-debugger-accent);
+    -unity-font-style: bold;
+}
+
+/* ---- graph ------------------------------------------------------------------------------- */
+
+.stat-graph {
+    flex-grow: 1;
+    background-color: var(--stat-graph-bg);
+}
+
+/* ---- graph toolbar: zoom + legend --------------------------------------------------------- */
+
+.stat-graph__toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 4px 10px;
+    background-color: var(--stat-debugger-chrome);
+    border-bottom-width: 2px;
+    border-color: var(--stat-debugger-border);
+}
+
+.stat-graph__toolbar-zoom {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* flex-shrink: 0 so "Fit" never gets squeezed down to a single letter when the legend wraps. */
+.stat-graph__toolbar-zoom-button {
+    min-width: 26px;
+    margin: 0 2px 0 0;
+    padding: 1px 8px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.stat-graph__toolbar-zoom-label {
+    min-width: 36px;
+    margin: 0 6px;
+    font-size: 10px;
+    -unity-text-align: middle-center;
+    color: var(--stat-debugger-muted);
+}
+
+.stat-graph__toolbar-legend {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.stat-graph__toolbar-legend-item {
+    flex-direction: row;
+    align-items: center;
+    margin-left: 14px;
+}
+
+.stat-graph__toolbar-legend-item-swatch {
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+    border-radius: 2px;
+    border-width: 1.5px;
+    border-color: var(--stat-debugger-border);
+    background-color: var(--stat-graph-node-bg);
+}
+
+/*
+    A 1px border in the node's own colour was nearly invisible at a glance — these chips add a
+    matching tinted fill (see --stat-debugger-*-tint in the theme files) so each reads as its own
+    colour, not just "a box".
+*/
+.stat-graph__toolbar-legend-item-swatch--modified {
+    border-color: var(--stat-debugger-accent);
+    background-color: var(--stat-debugger-accent-tint);
+}
+
+.stat-graph__toolbar-legend-item-swatch--foreign {
+    border-color: var(--stat-debugger-muted);
+    background-color: var(--stat-debugger-muted-tint);
+}
+
+.stat-graph__toolbar-legend-item-swatch--cycle {
+    border-color: var(--stat-debugger-danger-text);
+    background-color: var(--stat-debugger-danger-tint);
+}
+
+/* Edge samples: flatten the swatch into a short line instead of a chip. */
+.stat-graph__toolbar-legend-item-swatch--line {
+    height: 2px;
+    border-width: 0;
+    border-radius: 0;
+}
+
+.stat-graph__toolbar-legend-item-swatch--edge {
+    background-color: var(--stat-graph-edge);
+}
+
+.stat-graph__toolbar-legend-item-swatch--edge-cycle {
+    background-color: var(--stat-graph-edge-cycle);
+}
+
+.stat-graph__toolbar-legend-item-label {
+    font-size: 10px;
+    color: var(--stat-debugger-muted);
+}
+
+.stat-graph__scroll {
+    flex-grow: 1;
+}
+
+.stat-graph__canvas {
+    position: relative;
+}
+
+.stat-graph__empty {
+    padding: 24px 32px;
+    white-space: normal;
+    font-size: 11px;
+    color: var(--stat-debugger-muted);
+}
+
+.stat-graph__node {
+    position: absolute;
+    padding: 6px 10px;
+    border-width: 1px;
+    border-radius: 5px;
+    border-color: var(--stat-debugger-border);
+    background-color: var(--stat-graph-node-bg);
+}
+
+.stat-graph__node-name {
+    -unity-font-style: bold;
+    font-size: 11px;
+    color: var(--stat-debugger-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stat-graph__node-value {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--stat-debugger-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stat-graph__node--modified {
+    border-color: var(--stat-debugger-accent);
+}
+
+.stat-graph__node--modified .stat-graph__node-value {
+    color: var(--stat-debugger-accent);
+}
+
+/* An endpoint on another owner — drawn so cross-owner edges do not dangle into nothing. */
+.stat-graph__node--foreign {
+    border-color: var(--stat-debugger-muted);
+    background-color: var(--stat-graph-bg);
+}
+
+.stat-graph__node--foreign .stat-graph__node-name {
+    color: var(--stat-debugger-muted);
+}
+
+.stat-graph__node--foreign .stat-graph__node-value {
+    -unity-font-style: italic;
+}
+
+/* Should never appear: TryAddStatModifier refuses the modifier that would close a cycle. */
+.stat-graph__node--in-cycle {
+    border-color: var(--stat-debugger-danger-text);
+    background-color: var(--stat-debugger-danger-bg);
+}
+
+/*
+    Declared last so a selected node reads clearly even when also modified/foreign/in-cycle.
+    Deliberately only sets width + an amber tint, not border-color — the modified/foreign/cycle
+    colour underneath stays visible, so a selected *and* modified node still shows both facts.
+*/
+.stat-graph__node--selected {
+    border-width: 2px;
+    background-color: var(--stat-debugger-focus-bg);
+}

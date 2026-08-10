@@ -1,0 +1,64 @@
+<Project>
+    <PropertyGroup>
+        <UnityInstallRootPath>$([System.Environment]::GetEnvironmentVariable('UNITY_OS_INSTALL_ROOT'))</UnityInstallRootPath>
+        <UnityProjectPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)/../../..'))</UnityProjectPath>
+        <BaseOutputPath>$(MSBuildThisFileDirectory)../Build/$(MSBuildProjectName)/bin/</BaseOutputPath>
+        <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)../Build/$(MSBuildProjectName)/obj/</BaseIntermediateOutputPath>
+
+        <!--
+            Derived here rather than taken from the Unity3D NuGet package. UnityEngine.CoreModule.dll
+            is what defines UnityEngine.Debug and Unity.Collections.NativeArray; when the package
+            left UnityModulesPath empty the reference silently vanished and the generated code failed
+            to compile for reasons that looked like generator bugs.
+        -->
+        <UnityModulesPath Condition="'$(UnityInstallRootPath)' != ''">$(UnityInstallRootPath)/Editor/Data/Managed/UnityEngine</UnityModulesPath>
+        <UnityScriptAssembliesPath>$(UnityProjectPath)/Library/ScriptAssemblies</UnityScriptAssembliesPath>
+    </PropertyGroup>
+
+    <Target Name="VerifyUnityPaths" BeforeTargets="BeforeBuild">
+        <Error Condition="!Exists('$(UnityModulesPath)')"
+               Text="UnityModulesPath does not exist: '$(UnityModulesPath)'. Set UNITY_OS_INSTALL_ROOT to the Unity installation directory." />
+        <Error Condition="!Exists('$(UnityScriptAssembliesPath)/ApexionGame.Entities.Stats.dll')"
+               Text="ApexionGame.Entities.Stats.dll not found in '$(UnityScriptAssembliesPath)'. Open the Unity project once so it compiles the asmdef." />
+    </Target>
+
+    <PropertyGroup>
+        <LangVersion>10.0</LangVersion>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+    </PropertyGroup>
+
+    <!-- Mirrors the defines the asmdef compiles with. -->
+    <PropertyGroup>
+        <DefineConstants>$(DefineConstants);UNITY_5_3_OR_NEWER;UNITY_EDITOR;UNITY_BURST;UNITY_COLLECTIONS;UNITY_MATHEMATICS</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Unity3D" Version="3.1.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="$(UnityEditorPath)" Private="false" />
+        <Reference Remove="$(UnityEnginePath)" />
+        <Reference Include="$(UnityModulesPath)/UnityEngine.CoreModule.dll" Private="false" />
+        <Reference Include="$(UnityScriptAssembliesPath)/Unity.Burst.dll" Private="false" />
+        <Reference Include="$(UnityScriptAssembliesPath)/Unity.Collections.dll" Private="false" />
+        <Reference Include="$(UnityScriptAssembliesPath)/Unity.Mathematics.dll" Private="false" />
+        <Reference Include="$(UnityScriptAssembliesPath)/EncosyTower.Core.dll" Private="false" />
+        <Reference Include="$(UnityScriptAssembliesPath)/ApexionGame.Entities.Stats.dll" Private="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="$(MSBuildThisFileDirectory)../ApexionGame.SourceGen.Common/ApexionGame.SourceGen.Common.csproj"
+                          OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="$(MSBuildThisFileDirectory)../ApexionGame.SourceGen.Helpers/ApexionGame.SourceGen.Helpers.csproj"
+                          OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="$(MSBuildThisFileDirectory)../ApexionGame.SourceGen.Generators/ApexionGame.SourceGen.Generators.csproj"
+                          OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="$(MSBuildThisFileDirectory)../ApexionGame.SourceGen.Analyzers/ApexionGame.SourceGen.Analyzers.csproj"
+                          OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+</Project>

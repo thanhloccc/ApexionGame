@@ -1,0 +1,20 @@
+{
+    "name": "ApexionGame.Entities.Stats.Samples.Rts.Core",
+    "rootNamespace": "ApexionGame.Entities.Stats.Samples.Rts",
+    "references": [
+        "ApexionGame.Entities.Stats",
+        "EncosyTower.Core",
+        "Unity.Burst",
+        "Unity.Collections",
+        "Unity.Mathematics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

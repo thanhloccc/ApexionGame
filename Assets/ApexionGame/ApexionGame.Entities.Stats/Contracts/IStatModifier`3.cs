@@ -1,0 +1,52 @@
+// MIT License
+//
+// Copyright (c) 2023 Philippe St-Amand
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+using Unity.Collections;
+
+namespace ApexionGame.Entities.Stats
+{
+    public interface IStatModifier<TValuePair, TStat, TStatModifierStack>
+        where TValuePair : unmanaged, IStatValuePair
+        where TStat : unmanaged, IStat<TValuePair>
+        where TStatModifierStack : unmanaged, IStatModifierStack<TValuePair, TStat>
+    {
+        uint Id { get; set; }
+
+        void AddObservedStatsToList(NativeList<StatHandle> observedStatHandles);
+
+        void Apply(
+              StatReader<TValuePair, TStat> reader
+            , ref TStatModifierStack stack
+            , out bool shouldProduceModifierTriggerEvent
+        );
+
+        /// <summary>
+        /// Rewrites every <see cref="StatHandle"/> stored in this modifier onto the handles the
+        /// owners were restored as.
+        /// </summary>
+        /// <remarks>
+        /// Not present in the upstream contract; required because a <see cref="StatHandle"/> embeds
+        /// <see cref="StatOwnerHandle"/>.Index/Version, which do not survive a save/load round trip.
+        /// </remarks>
+        void RemapObservedStats(in StatOwnerRemap remap);
+    }
+}

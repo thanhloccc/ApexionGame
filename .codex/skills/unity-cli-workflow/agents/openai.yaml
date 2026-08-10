@@ -1,0 +1,4 @@
+interface:
+  display_name: "Unity CLI Workflow"
+  short_description: "Automate Unity projects through the official CLI"
+  default_prompt: "Use $unity-cli-workflow to inspect, test, build, or automate this Unity project with Unity CLI."

@@ -1,0 +1,48 @@
+/* The only place literal colours are allowed. */
+
+:root {
+    --stat-debugger-border: rgb(178, 178, 178);
+    --stat-debugger-chrome: rgb(224, 224, 224);
+    --stat-debugger-header-bg: rgb(214, 214, 214);
+    --stat-debugger-row-hover: rgb(228, 228, 228);
+    --stat-debugger-row-alt: rgb(240, 240, 240);
+    --stat-debugger-selection: rgb(174, 200, 234);
+    --stat-debugger-text: rgb(38, 38, 38);
+    --stat-debugger-muted: rgb(112, 112, 112);
+    --stat-debugger-accent: rgb(18, 88, 172);
+    --stat-debugger-danger-text: rgb(118, 20, 20);
+    --stat-debugger-danger-bg: rgb(250, 214, 214);
+
+    --stat-graph-bg: rgb(236, 236, 236);
+    --stat-graph-node-bg: rgb(250, 250, 250);
+
+    /* Match the Painter2D colours in StatGraphView exactly, so the legend never drifts from
+       what is actually drawn (those two are C# Color literals, not USS, and are not themed). */
+    --stat-graph-edge: rgb(107, 140, 178);
+    --stat-graph-edge-cycle: rgb(232, 92, 92);
+
+    /* Inset look for text fields — a visibly darker border than the chrome bar so it reads as an
+       input instead of blending into the toolbar/section header behind it. */
+    --stat-debugger-input-bg: rgb(255, 255, 255);
+    --stat-debugger-input-border: rgb(150, 150, 150);
+
+    /* The owner list / stats rows / graph canvas are all "content", one shade off from the
+       --stat-debugger-chrome used by every toolbar and section-header bar — without this the
+       whole window read as one flat grey with only 1-2px lines marking panel boundaries. */
+    --stat-debugger-content-bg: rgb(246, 246, 246);
+
+    /* Selection/focus uses amber, deliberately a different hue from the blue "modified" accent —
+       the first pass reused accent blue for both and a selected-and-modified row/node became
+       impossible to tell apart from a merely-modified one. */
+    --stat-debugger-focus: rgb(180, 95, 6);
+    --stat-debugger-focus-bg: rgba(180, 95, 6, 0.16);
+
+    --stat-debugger-button-bg: rgb(238, 238, 238);
+    --stat-debugger-button-border: rgb(160, 160, 160);
+
+    /* Tinted fills for the legend chips — a 1px border alone was too faint against the light
+       node background, so modified/foreign/cycle also get a soft background wash. */
+    --stat-debugger-accent-tint: rgba(18, 88, 172, 0.14);
+    --stat-debugger-danger-tint: rgba(118, 20, 20, 0.12);
+    --stat-debugger-muted-tint: rgba(112, 112, 112, 0.14);
+}

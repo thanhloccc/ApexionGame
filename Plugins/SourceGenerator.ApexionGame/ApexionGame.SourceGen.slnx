@@ -1,0 +1,17 @@
+﻿<Solution>
+  <Folder Name="/Samples/">
+    <File Path="Samples/Directory.Build.props" />
+    <Project Path="Samples/Samples.Entities.Stats/Samples.Entities.Stats.csproj" />
+    <Project Path="Samples/Samples.RpgStats/Samples.RpgStats.csproj" />
+  </Folder>
+  <Folder Name="/SourceGen/">
+    <File Path="Directory.Build.props" />
+    <Project Path="ApexionGame.SourceGen.Analyzers/ApexionGame.SourceGen.Analyzers.csproj" />
+    <Project Path="ApexionGame.SourceGen.CodeRefactors/ApexionGame.SourceGen.CodeRefactors.csproj" />
+    <Project Path="ApexionGame.SourceGen.Common/ApexionGame.SourceGen.Common.csproj" />
+    <Project Path="ApexionGame.SourceGen.Generators/ApexionGame.SourceGen.Generators.csproj" />
+    <Project Path="ApexionGame.SourceGen.Helpers/ApexionGame.SourceGen.Helpers.csproj" />
+    <Project Path="ApexionGame.SourceGen.Tests/ApexionGame.SourceGen.Tests.csproj" />
+  </Folder>
+</Solution>
+

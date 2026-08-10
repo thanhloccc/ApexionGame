@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>10.0</LangVersion>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+        <IsRoslynComponent>true</IsRoslynComponent>
+
+        <!-- does not need runtime self -->
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+        <IncludeSymbols>false</IncludeSymbols>
+        <DevelopmentDependency>true</DevelopmentDependency>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="bin/**" />
+        <EmbeddedResource Remove="bin/**" />
+        <None Remove="bin/**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.1" PrivateAssets="all" />
+        <!-- CodeRefactoringProvider and CodeAction live in the Workspaces layer, which the
+             generator and analyzer projects do not need. -->
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.1" PrivateAssets="all" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="ApexionGame.SourceGen.Tests" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5723a5830e34aa347a0f04446374a546
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 342982
+  packageName: KayKit - Mystery Series 5 (for Unity)
+  packageVersion: 1.0.1
+  assetPath: Assets/KayKit/Characters/Animations/Animations/Rig_Medium/General/Hit_A.anim
+  uploadId: 831996

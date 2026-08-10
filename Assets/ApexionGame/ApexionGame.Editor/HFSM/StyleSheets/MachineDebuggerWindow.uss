@@ -1,0 +1,552 @@
+/* Shape only. Every colour is a variable defined in _Dark.uss / _Light.uss. */
+
+.hfsm-debugger {
+    flex-grow: 1;
+}
+
+/* ---- scrollbars: thin, flat, no arrow buttons ---------------------------------------------- */
+
+/*
+    Class names confirmed against the live element tree of a real ScrollView in this Unity
+    version (Scroller/ScrollerSlider are internal types, but their USS classes are the public,
+    documented surface). Applied once here rather than per-panel, since every scrollable panel in
+    this window is a descendant of .hfsm-debugger.
+*/
+.hfsm-debugger .unity-scroller--vertical {
+    width: 12px !important;
+}
+
+.hfsm-debugger .unity-scroller--horizontal {
+    height: 12px !important;
+}
+
+.hfsm-debugger .unity-scroller__low-button,
+.hfsm-debugger .unity-scroller__high-button {
+    display: none !important;
+}
+
+.hfsm-debugger .unity-scroller__slider {
+    margin: 0 !important;
+}
+
+.hfsm-debugger .unity-base-slider__drag-container {
+    margin: 2px !important;
+}
+
+.hfsm-debugger .unity-base-slider__tracker {
+    background-color: transparent !important;
+    border-width: 0 !important;
+}
+
+.hfsm-debugger .unity-base-slider__dragger-border {
+    border-width: 0 !important;
+}
+
+.hfsm-debugger .unity-base-slider__dragger {
+    left: 0 !important;
+    background-color: var(--hfsm-text-faint) !important;
+    border-width: 0 !important;
+    border-radius: 4px !important;
+    opacity: 0.45 !important;
+}
+
+.hfsm-debugger .unity-base-slider__dragger:hover {
+    background-color: var(--hfsm-text-muted) !important;
+    opacity: 0.9 !important;
+}
+
+/* ---- toolbar ------------------------------------------------------------------------------ */
+
+.hfsm-debugger__toolbar {
+    flex-direction: row;
+    align-items: center;
+    height: 40px;
+    padding: 0 10px;
+    border-bottom-width: 1px;
+    border-color: var(--hfsm-border);
+    background-color: var(--hfsm-bg-chrome);
+}
+
+.hfsm-debugger__toolbar-field {
+    width: 220px;
+    margin: 0;
+}
+
+/*
+    background-image: none is load-bearing here, not decoration: Unity's built-in popup-field skin
+    paints its own background texture that fights any background-color override on hover.
+*/
+.hfsm-debugger__toolbar-field > .unity-base-popup-field__input {
+    background-image: none;
+    color: var(--hfsm-text);
+    background-color: var(--hfsm-bg-input);
+    border-width: 1px;
+    border-radius: 5px;
+    border-color: var(--hfsm-input-border);
+    padding: 3px 8px;
+}
+
+.hfsm-debugger__toolbar-field > .unity-base-popup-field__input:hover,
+.hfsm-debugger__toolbar-field > .unity-base-popup-field__input:focus {
+    border-color: var(--hfsm-accent);
+}
+
+.hfsm-debugger__toolbar-info {
+    margin-left: 14px;
+    font-size: 11px;
+    color: var(--hfsm-text-muted);
+}
+
+.hfsm-debugger__toolbar-spacer {
+    flex-grow: 1;
+}
+
+.hfsm-debugger__toolbar-toggle {
+    margin: 0;
+}
+
+.hfsm-debugger__toolbar-toggle .unity-toggle__checkmark {
+    background-image: none;
+    width: 15px;
+    height: 15px;
+    border-width: 1px;
+    border-radius: 3px;
+    border-color: var(--hfsm-input-border);
+    background-color: var(--hfsm-bg-input);
+}
+
+.hfsm-debugger__toolbar-toggle:checked .unity-toggle__checkmark {
+    border-color: var(--hfsm-accent);
+    background-color: var(--hfsm-accent);
+}
+
+.hfsm-debugger__toolbar-toggle .unity-toggle__checkmark:hover {
+    border-color: var(--hfsm-accent);
+}
+
+.hfsm-debugger__toolbar-toggle-label {
+    margin: 0 10px 0 5px;
+    font-size: 11px;
+    color: var(--hfsm-text-muted);
+}
+
+.hfsm-debugger__toolbar-button {
+    background-image: none;
+    background-color: var(--hfsm-button-bg);
+    border-width: 1px;
+    border-radius: 5px;
+    border-color: var(--hfsm-input-border);
+    color: var(--hfsm-text);
+    min-width: 64px;
+    height: 24px;
+    margin: 0;
+}
+
+.hfsm-debugger__toolbar-button:hover {
+    background-color: var(--hfsm-button-bg-hover);
+    border-color: var(--hfsm-accent);
+}
+
+.hfsm-debugger__toolbar-button:active {
+    background-color: var(--hfsm-accent-tint);
+}
+
+.hfsm-debugger__empty {
+    padding: 32px 36px;
+    white-space: normal;
+    font-size: 12px;
+    -unity-text-align: upper-left;
+    color: var(--hfsm-text-muted);
+}
+
+/* ---- body -------------------------------------------------------------------------------- */
+
+.hfsm-debugger__body {
+    flex-grow: 1;
+    background-color: var(--hfsm-border);
+}
+
+.hfsm-debugger__left-column {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+/* Every direct panel gets a 1px seam from its neighbours via the body's own background showing
+   through a small margin, instead of each panel drawing its own border on every side — cheaper
+   to keep consistent than four separate border declarations per panel. */
+.hfsm-active-path,
+.hfsm-guard-list,
+.hfsm-graph,
+.hfsm-transition-log {
+    margin: 1px;
+}
+
+/* ---- active path --------------------------------------------------------------------------- */
+
+.hfsm-active-path {
+    flex-shrink: 0;
+    min-height: 100px;
+    max-height: 240px;
+    padding: 6px 0;
+    background-color: var(--hfsm-bg-panel);
+}
+
+.hfsm-active-path__scroll {
+    flex-shrink: 1;
+}
+
+.hfsm-active-path__row {
+    flex-direction: row;
+    align-items: center;
+    height: 22px;
+    padding-right: 12px;
+    border-left-width: 2px;
+    border-left-color: rgba(0, 0, 0, 0);
+}
+
+.hfsm-active-path__row--leaf {
+    border-left-color: var(--hfsm-accent);
+    background-color: var(--hfsm-accent-tint);
+}
+
+.hfsm-active-path__row-name {
+    font-size: 11px;
+    color: var(--hfsm-text-muted);
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hfsm-active-path__row-name--leaf {
+    -unity-font-style: bold;
+    color: var(--hfsm-accent);
+}
+
+.hfsm-active-path__row-time {
+    font-size: 10px;
+    color: var(--hfsm-text-faint);
+    -unity-text-align: middle-right;
+    min-width: 48px;
+}
+
+.hfsm-active-path__history {
+    margin: 4px 10px 2px 10px;
+    padding-top: 6px;
+    border-top-width: 1px;
+    border-color: var(--hfsm-border-soft);
+}
+
+.hfsm-active-path__history-line {
+    font-size: 10px;
+    color: var(--hfsm-text-faint);
+}
+
+.hfsm-active-path__empty {
+    padding: 12px 14px;
+    font-size: 11px;
+    color: var(--hfsm-text-faint);
+    white-space: normal;
+}
+
+/* ---- guard list ---------------------------------------------------------------------------- */
+
+.hfsm-guard-list {
+    flex-grow: 1;
+    background-color: var(--hfsm-bg-panel);
+}
+
+.hfsm-guard-list__header {
+    flex-direction: row;
+    align-items: center;
+    height: 26px;
+    padding: 0 12px;
+    background-color: var(--hfsm-bg-chrome);
+    border-bottom-width: 1px;
+    border-color: var(--hfsm-border);
+}
+
+.hfsm-guard-list__header-title {
+    -unity-font-style: bold;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: var(--hfsm-text-muted);
+}
+
+.hfsm-guard-list__scroll {
+    flex-grow: 1;
+}
+
+.hfsm-guard-list__row {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 12px;
+    border-bottom-width: 1px;
+    border-color: var(--hfsm-border-soft);
+}
+
+.hfsm-guard-list__row--even {
+    background-color: var(--hfsm-bg-row-alt);
+}
+
+.hfsm-guard-list__row:hover {
+    background-color: var(--hfsm-bg-row-hover);
+}
+
+/* The dot itself: a small filled circle whose colour alone carries the meaning -- no reliance on
+   a Unicode glyph that some editor fonts render as tofu. */
+.hfsm-guard-list__row-marker {
+    width: 9px;
+    height: 9px;
+    margin-right: 10px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    background-color: var(--hfsm-text-faint);
+}
+
+.hfsm-guard-list__row-marker--eligible {
+    background-color: var(--hfsm-success);
+}
+
+.hfsm-guard-list__row-marker--blocked {
+    background-color: var(--hfsm-warning);
+}
+
+.hfsm-guard-list__row-marker--pending {
+    background-color: transparent;
+    border-width: 1px;
+    border-color: var(--hfsm-text-faint);
+}
+
+.hfsm-guard-list__row-route {
+    width: 130px;
+    margin-right: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background-color: var(--hfsm-bg-chrome);
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: var(--hfsm-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hfsm-guard-list__row--eligible .hfsm-guard-list__row-route {
+    color: var(--hfsm-accent);
+}
+
+.hfsm-guard-list__row-condition {
+    flex-grow: 1;
+    font-size: 11px;
+    -unity-font-style: italic;
+    color: var(--hfsm-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hfsm-guard-list__row-value {
+    min-width: 92px;
+    margin-left: 8px;
+    font-size: 10px;
+    -unity-text-align: middle-right;
+    color: var(--hfsm-text-faint);
+}
+
+.hfsm-guard-list__empty {
+    padding: 16px 14px;
+    white-space: normal;
+    font-size: 11px;
+    color: var(--hfsm-text-faint);
+}
+
+/* ---- state graph --------------------------------------------------------------------------- */
+
+.hfsm-graph {
+    flex-grow: 1;
+    background-color: var(--hfsm-graph-bg);
+}
+
+.hfsm-graph__scroll {
+    flex-grow: 1;
+}
+
+.hfsm-graph__canvas {
+    position: relative;
+}
+
+.hfsm-graph__empty {
+    padding: 28px 32px;
+    white-space: normal;
+    font-size: 11px;
+    color: var(--hfsm-text-faint);
+}
+
+.hfsm-graph__node {
+    position: absolute;
+    padding: 7px 10px;
+    border-width: 1px;
+    border-radius: 8px;
+    border-color: var(--hfsm-border-soft);
+    background-color: var(--hfsm-graph-node-bg);
+    transition-property: border-color, background-color, opacity;
+    transition-duration: 0.12s;
+}
+
+.hfsm-graph__node-name {
+    -unity-font-style: bold;
+    font-size: 11px;
+    color: var(--hfsm-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hfsm-graph__node-kind {
+    align-self: flex-start;
+    margin-top: 4px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background-color: var(--hfsm-bg-chrome);
+    font-size: 8px;
+    letter-spacing: 0.5px;
+    color: var(--hfsm-text-faint);
+}
+
+/* A coloured top edge rather than a thicker border all round -- reads as "this node has regions"
+   without competing with the active/selected border treatments below. */
+.hfsm-graph__node--parallel {
+    border-top-width: 3px;
+    border-top-color: var(--hfsm-trigger);
+}
+
+.hfsm-graph__node--dimmed {
+    opacity: 0.5;
+}
+
+.hfsm-graph__node--active {
+    border-width: 2px;
+    border-color: var(--hfsm-accent);
+    opacity: 1;
+}
+
+.hfsm-graph__node--active .hfsm-graph__node-name {
+    color: var(--hfsm-text);
+}
+
+.hfsm-graph__node--active-leaf {
+    background-color: var(--hfsm-accent-tint);
+}
+
+.hfsm-graph__node--selected {
+    border-color: var(--hfsm-focus);
+    background-color: var(--hfsm-focus-tint);
+}
+
+/* ---- transition log ------------------------------------------------------------------------ */
+
+.hfsm-transition-log {
+    flex-shrink: 0;
+    min-height: 100px;
+    background-color: var(--hfsm-bg-panel);
+}
+
+.hfsm-transition-log__header {
+    flex-direction: row;
+    align-items: center;
+    height: 26px;
+    padding: 0 12px;
+    background-color: var(--hfsm-bg-chrome);
+    border-bottom-width: 1px;
+    border-color: var(--hfsm-border);
+}
+
+.hfsm-transition-log__header-title {
+    -unity-font-style: bold;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: var(--hfsm-text-muted);
+}
+
+.hfsm-transition-log__scroll {
+    flex-grow: 1;
+}
+
+.hfsm-transition-log__row {
+    flex-direction: row;
+    align-items: center;
+    height: 24px;
+    padding: 0 12px;
+    border-bottom-width: 1px;
+    border-left-width: 2px;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-color: var(--hfsm-border-soft);
+}
+
+.hfsm-transition-log__row--even {
+    background-color: var(--hfsm-bg-row-alt);
+}
+
+.hfsm-transition-log__row:hover {
+    background-color: var(--hfsm-bg-row-hover);
+}
+
+.hfsm-transition-log__row--header {
+    height: 22px;
+    -unity-font-style: bold;
+    background-color: var(--hfsm-bg-chrome);
+    border-left-width: 0;
+}
+
+.hfsm-transition-log__row--header .hfsm-transition-log__cell {
+    color: var(--hfsm-text-faint);
+    font-size: 9px;
+    letter-spacing: 0.5px;
+}
+
+.hfsm-transition-log__row--unmatched {
+    border-left-color: var(--hfsm-danger);
+    background-color: var(--hfsm-danger-tint);
+}
+
+.hfsm-transition-log__cell {
+    font-size: 11px;
+    color: var(--hfsm-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -unity-text-align: middle-left;
+}
+
+.hfsm-transition-log__cell--0 {
+    flex-grow: 2;
+    min-width: 140px;
+    -unity-font-style: bold;
+}
+
+.hfsm-transition-log__cell--1 {
+    width: 56px;
+    color: var(--hfsm-text-faint);
+    -unity-text-align: middle-right;
+}
+
+.hfsm-transition-log__cell--2 {
+    width: 56px;
+    color: var(--hfsm-text-faint);
+    -unity-text-align: middle-right;
+}
+
+.hfsm-transition-log__cell--3 {
+    flex-grow: 1;
+    min-width: 120px;
+    margin-left: 10px;
+    color: var(--hfsm-text-muted);
+}
+
+.hfsm-transition-log__empty {
+    padding: 16px 14px;
+    white-space: normal;
+    font-size: 11px;
+    color: var(--hfsm-text-faint);
+}

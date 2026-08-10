@@ -1,0 +1,1469 @@
+// https://github.com/sebas77/Svelto.Common/blob/master/DataStructures/Arrays/FasterList.cs
+
+// MIT License
+//
+// Copyright (c) 2015-2020 Sebastiano Mandalà
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using EncosyTower.Collections.Extensions;
+using EncosyTower.Common;
+using EncosyTower.Types;
+using UnityEngine;
+
+using static EncosyTower.Debugging.ValidationDefines;
+
+namespace EncosyTower.Collections
+{
+    public partial class FasterList<T> : IList<T>, IReadOnlyList<T>, IIndexer<T>
+        , IAsSpan<T>, IAsReadOnlySpan<T>, IToArray<T>
+        , ICopyFromSpan<T>, ITryCopyFromSpan<T>
+        , ICopyToSpan<T>, ITryCopyToSpan<T>
+        , IAddRangeSpan<T>, IContains<T>
+        , IClearable, IIncreaseCapacity, IHasCount
+    {
+        internal T[] _buffer;
+        internal int _count;
+        internal int _version;
+
+        public FasterList()
+        {
+            _buffer = Array.Empty<T>();
+            _count = 0;
+            _version = 0;
+        }
+
+        public FasterList(int capacity)
+        {
+            _buffer = new T[capacity];
+            _count = 0;
+            _version = 0;
+        }
+
+        public FasterList([NotNull] params T[] source)
+        {
+            _buffer = new T[source.Length];
+
+            Array.Copy(source, _buffer, source.Length);
+
+            _count = source.Length;
+            _version = 0;
+        }
+
+        public FasterList(in ArraySegment<T> source)
+        {
+            _buffer = new T[source.Count];
+
+            source.CopyTo(_buffer, 0);
+
+            _count = source.Count;
+            _version = 0;
+        }
+
+        public FasterList(in ReadOnlySpan<T> source)
+        {
+            _buffer = new T[source.Length];
+
+            source.CopyTo(_buffer);
+
+            _count = source.Length;
+            _version = 0;
+        }
+
+        public FasterList([NotNull] ICollection<T> source)
+        {
+            _buffer = new T[source.Count];
+
+            source.CopyTo(_buffer, 0);
+
+            _count = source.Count;
+            _version = 0;
+        }
+
+        public FasterList([NotNull] ICollection<T> source, int extraSize)
+        {
+            _buffer = new T[source.Count + extraSize];
+
+            source.CopyTo(_buffer, 0);
+
+            _count = source.Count;
+            _version = 0;
+        }
+
+        public FasterList(in ReadOnly source)
+        {
+            _buffer = new T[source.Count];
+
+            source.CopyTo(_buffer, 0);
+
+            _count = source.Count;
+            _version = 0;
+        }
+
+        public int Count
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _count;
+        }
+
+        public int Capacity
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => _buffer.Length;
+        }
+
+        public bool IsReadOnly
+            => false;
+
+        public T this[int index]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                ThrowHelper.ThrowIfIndexIsOutOfRange((uint)index < (uint)_count, ThrowHelper.CollectionType.FasterList);
+                return _buffer[index];
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set
+            {
+                ThrowHelper.ThrowIfIndexIsOutOfRange((uint)index < (uint)_count, ThrowHelper.CollectionType.FasterList);
+                _version++;
+                _buffer[index] = value;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Exists([NotNull] Predicate<T> match)
+            => FindIndex(match) != -1;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Exists([NotNull] PredicateIn<T> match)
+            => FindIndex(match) != -1;
+
+        public Option<T> Find([NotNull] Predicate<T> match)
+        {
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(item))
+                {
+                    return item;
+                }
+            }
+
+            return Option.None;
+        }
+
+        public Option<T> Find([NotNull] PredicateIn<T> match)
+        {
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(in item))
+                {
+                    return item;
+                }
+            }
+
+            return Option.None;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public FasterList<T> FindAll([NotNull] Predicate<T> match)
+        {
+            var result = new FasterList<T>();
+            FindAll(match, result);
+
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public FasterList<T> FindAll([NotNull] PredicateIn<T> match)
+        {
+            var result = new FasterList<T>();
+            FindAll(match, result);
+
+            return result;
+        }
+
+        public void FindAll([NotNull] Predicate<T> match, [NotNull] FasterList<T> result)
+        {
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(item))
+                {
+                    result.Add(item);
+                }
+            }
+        }
+
+        public void FindAll([NotNull] PredicateIn<T> match, [NotNull] FasterList<T> result)
+        {
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(in item))
+                {
+                    result.Add(in item);
+                }
+            }
+        }
+
+        public void FindAll([NotNull] Predicate<T> match, [NotNull] ListFast<T> result)
+        {
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(item))
+                {
+                    result.Add(item);
+                }
+            }
+        }
+
+        public void FindAll([NotNull] PredicateIn<T> match, [NotNull] ListFast<T> result)
+        {
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(in item))
+                {
+                    result.Add(in item);
+                }
+            }
+        }
+
+        public void FindAll([NotNull] Predicate<T> match, [NotNull] ICollection<T> result)
+        {
+            if (result is FasterList<T> fasterResult)
+            {
+                FindAll(match, fasterResult);
+                return;
+            }
+
+            if (result is List<T> listResult)
+            {
+                FindAll(match, listResult);
+                return;
+            }
+
+            var items = AsReadOnlySpan();
+            result.AddRangeFast(items);
+        }
+
+        public void FindAll([NotNull] PredicateIn<T> match, [NotNull] ICollection<T> result)
+        {
+            if (result is FasterList<T> fasterResult)
+            {
+                FindAll(match, fasterResult);
+                return;
+            }
+
+            if (result is List<T> listResult)
+            {
+                FindAll(match, listResult);
+                return;
+            }
+
+            var items = AsReadOnlySpan();
+            result.AddRangeFast(items);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int FindIndex([NotNull] Predicate<T> match)
+            => FindIndex(0, _count, match);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int FindIndex(int startIndex, Predicate<T> match)
+            => FindIndex(startIndex, _count - startIndex, match);
+
+        public int FindIndex(int startIndex, int count, [NotNull] Predicate<T> match)
+        {
+            ThrowHelper.ThrowIfFindStartIndexIsOutOfRange((uint)startIndex < (uint)_count, ThrowHelper.CollectionType.FasterList);
+            ThrowIfCountIsNegative(count >= 0);
+            ThrowHelper.ThrowIfFindSectionIsInvalid(startIndex <= _count - count, ThrowHelper.CollectionType.FasterList);
+
+            var items = AsReadOnlySpan();
+            var endIndex = startIndex + count;
+
+            for (var i = startIndex; i < endIndex; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(item))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int FindIndex([NotNull] PredicateIn<T> match)
+            => FindIndex(0, _count, match);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int FindIndex(int startIndex, PredicateIn<T> match)
+            => FindIndex(startIndex, _count - startIndex, match);
+
+        public int FindIndex(int startIndex, int count, [NotNull] PredicateIn<T> match)
+        {
+            ThrowHelper.ThrowIfFindStartIndexIsOutOfRange((uint)startIndex < (uint)_count, ThrowHelper.CollectionType.FasterList);
+            ThrowIfCountIsNegative(count >= 0);
+            ThrowHelper.ThrowIfFindSectionIsInvalid(startIndex <= _count - count, ThrowHelper.CollectionType.FasterList);
+
+            var items = AsReadOnlySpan();
+            var endIndex = startIndex + count;
+
+            for (var i = startIndex; i < endIndex; i++)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(in item))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int FindLastIndex([NotNull] Predicate<T> match)
+            => FindLastIndex(_count - 1, _count, match);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int FindLastIndex(int startIndex, [NotNull] Predicate<T> match)
+            => FindLastIndex(startIndex, startIndex + 1, match);
+
+        public int FindLastIndex(int startIndex, int count, [NotNull] Predicate<T> match)
+        {
+            if (_count == 0)
+            {
+                ThrowHelper.ThrowIfFindStartIndexIsOutOfRange(startIndex == -1, ThrowHelper.CollectionType.FasterList);
+            }
+            else
+            {
+                ThrowHelper.ThrowIfFindStartIndexIsOutOfRange((uint)startIndex < (uint)_count, ThrowHelper.CollectionType.FasterList);
+            }
+
+            ThrowIfCountIsNegative(count >= 0);
+            ThrowHelper.ThrowIfFindSectionIsInvalid(startIndex - count + 1 >= 0, ThrowHelper.CollectionType.FasterList);
+
+            var items = AsReadOnlySpan();
+            var endIndex = startIndex - count;
+
+            for (var i = startIndex; i > endIndex; i--)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(item))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int FindLastIndex([NotNull] PredicateIn<T> match)
+            => FindLastIndex(_count - 1, _count, match);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int FindLastIndex(int startIndex, [NotNull] PredicateIn<T> match)
+            => FindLastIndex(startIndex, startIndex + 1, match);
+
+        public int FindLastIndex(int startIndex, int count, [NotNull] PredicateIn<T> match)
+        {
+            if (_count == 0)
+            {
+                ThrowHelper.ThrowIfFindStartIndexIsOutOfRange(startIndex == -1, ThrowHelper.CollectionType.FasterList);
+            }
+            else
+            {
+                ThrowHelper.ThrowIfFindStartIndexIsOutOfRange((uint)startIndex < (uint)_count, ThrowHelper.CollectionType.FasterList);
+            }
+
+            ThrowIfCountIsNegative(count >= 0);
+            ThrowHelper.ThrowIfFindSectionIsInvalid(startIndex - count + 1 >= 0, ThrowHelper.CollectionType.FasterList);
+
+            var items = AsReadOnlySpan();
+            var endIndex = startIndex - count;
+
+            for (var i = startIndex; i > endIndex; i--)
+            {
+                ref readonly var item = ref items[i];
+
+                if (match(in item))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfIndexIsOutOfRange([DoesNotReturnIf(false)] bool isWithinRange)
+        {
+            if (isWithinRange == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("index is outside the range of valid indexes for the FasterList<T>");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfFindIndexStartIsOutOfRange([DoesNotReturnIf(false)] bool isWithinRange)
+        {
+            if (isWithinRange == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("startIndex is outside the range of valid indexes for the FasterList<T>");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfCountIsNegative([DoesNotReturnIf(false)] bool isNonNegative)
+        {
+            if (isNonNegative == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("count is less than 0");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfFindIndexSectionIsInvalid([DoesNotReturnIf(false)] bool isWithinRange)
+        {
+            if (isWithinRange == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("startIndex and count do not specify a valid section in the FasterList<T>");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfFindLastEmptyStartIsOutOfRange([DoesNotReturnIf(false)] bool isEmptyStart)
+        {
+            if (isEmptyStart == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("startIndex is outside the range of valid indexes for the FasterList<T>");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfFindLastStartIsOutOfRange([DoesNotReturnIf(false)] bool isWithinRange)
+        {
+            if (isWithinRange == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("startIndex is outside the range of valid indexes for the FasterList<T>");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfFindLastSectionIsInvalid([DoesNotReturnIf(false)] bool isWithinRange)
+        {
+            if (isWithinRange == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("startIndex and count do not specify a valid section in the FasterList<T>");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IndexOf(T item)
+            => IndexOf(item, 0);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IndexOf(T item, int index)
+            => IndexOf(item, index, _count - index);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IndexOf(T item, int index, int count)
+        {
+            ThrowIfIndexIsNegative(index >= 0);
+            ThrowIfCountIsNegative(count >= 0);
+            ThrowHelper.ThrowIfIndexSectionIsInvalid(index + count <= _count, ThrowHelper.CollectionType.FasterList);
+            return Array.IndexOf(_buffer, item, index, count);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IndexOf(in T item)
+            => IndexOf(in item, 0);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IndexOf(in T item, int index)
+            => IndexOf(in item, index, _count - index);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IndexOf(in T item, int index, int count)
+        {
+            ThrowIfIndexIsNegative(index >= 0);
+            ThrowIfCountIsNegative(count >= 0);
+            ThrowHelper.ThrowIfIndexSectionIsInvalid(index + count <= _count, ThrowHelper.CollectionType.FasterList);
+            return Array.IndexOf(_buffer, item, index, count);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Add(T item)
+        {
+            _version++;
+
+            if (_count == _buffer.Length)
+            {
+                AllocateMore();
+            }
+
+            _buffer[_count++] = item;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Add(in T item)
+        {
+            _version++;
+
+            if (_count == _buffer.Length)
+            {
+                AllocateMore();
+            }
+
+            _buffer[_count++] = item;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Insert(int index, T item)
+        {
+            ThrowHelper.ThrowIfInsertionIndexIsOutOfRange((uint)index <= (uint)_count, ThrowHelper.CollectionType.FasterList);
+
+            _version++;
+
+            if (_count == _buffer.Length)
+            {
+                AllocateMore();
+            }
+
+            Array.Copy(_buffer, index, _buffer, index + 1, _count - index);
+            ++_count;
+
+            _buffer[index] = item;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Insert(int index, in T item)
+        {
+            ThrowHelper.ThrowIfInsertionIndexIsOutOfRange((uint)index <= (uint)_count, ThrowHelper.CollectionType.FasterList);
+
+            _version++;
+
+            if (_count == _buffer.Length)
+            {
+                AllocateMore();
+            }
+
+            Array.Copy(_buffer, index, _buffer, index + 1, _count - index);
+            ++_count;
+
+            _buffer[index] = item;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T ElementAt(int index)
+        {
+            ThrowHelper.ThrowIfIndexIsOutOfRange((uint)index < (uint)_count, ThrowHelper.CollectionType.FasterList);
+            return ref _buffer[index];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void AddRange([NotNull] T[] items)
+            => AddRange(items, items.Length);
+
+        public void AddRange([NotNull] T[] items, int count)
+        {
+            _version++;
+
+            if (count == 0)
+            {
+                return;
+            }
+
+            if (_buffer.Length - _count < count)
+            {
+                AllocateMore(checked(_count + count));
+            }
+
+            Array.Copy(items, 0, _buffer, _count, count);
+            _count += count;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void AddRange(ReadOnlySpan<T> items)
+            => AddRange(items, items.Length);
+
+        public void AddRange(ReadOnlySpan<T> items, int count)
+        {
+            _version++;
+
+            if (count == 0)
+            {
+                return;
+            }
+
+            if (_buffer.Length - _count < count)
+            {
+                AllocateMore(checked(_count + count));
+            }
+
+            items[..count].CopyTo(_buffer.AsSpan(_count, count));
+            _count += count;
+        }
+
+        public void AddRange([NotNull] IEnumerable<T> collection)
+        {
+            if (collection is ICollection<T> c)
+            {
+                var count = c.Count;
+
+                if (count > 0)
+                {
+                    if (_buffer.Length - _count < count)
+                    {
+                        AllocateMore(checked(_count + count));
+                    }
+
+                    c.CopyTo(_buffer, _count);
+                    _count += count;
+                    _version++;
+                }
+            }
+            else
+            {
+                using IEnumerator<T> en = collection.GetEnumerator();
+
+                while (en.MoveNext())
+                {
+                    Add(en.Current);
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Contains(T item)
+        {
+            return _count > 0 && Array.IndexOf(_buffer, item, 0, _count) >= 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Contains(in T item)
+        {
+            return _count > 0 && Array.IndexOf(_buffer, item, 0, _count) >= 0;
+        }
+
+        public void ForEach([NotNull] Action<T> action)
+        {
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+            var version = _version;
+
+            for (var i = 0; i < length; i++)
+            {
+                if (version != _version)
+                {
+                    break;
+                }
+
+                ref readonly var item = ref items[i];
+                action(item);
+            }
+
+            ThrowIfCollectionWasModified(version == _version);
+        }
+
+        public void ForEach([NotNull] ActionIn<T> action)
+        {
+            var items = AsReadOnlySpan();
+            var length = items.Length;
+            var version = _version;
+
+            for (var i = 0; i < length; i++)
+            {
+                if (version != _version)
+                {
+                    break;
+                }
+
+                ref readonly var item = ref items[i];
+                action(in item);
+            }
+
+            ThrowIfCollectionWasModified(version == _version);
+        }
+
+        public void ForEach([NotNull] ActionRef<T> action)
+        {
+            var items = AsSpan();
+            var length = items.Length;
+            var version = _version;
+
+            for (var i = 0; i < length; i++)
+            {
+                if (version != _version)
+                {
+                    break;
+                }
+
+                action(ref items[i]);
+            }
+
+            ThrowIfCollectionWasModified(version == _version);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Clear()
+        {
+            _version++;
+
+            if (EncosyTypeExtensions.IsUnmanaged<T>() == false)
+            {
+                Array.Clear(_buffer, 0, _buffer.Length);
+            }
+
+            _count = 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(T[] destination, int destinationIndex)
+            => CopyTo(destination.AsSpan().Slice(destinationIndex, _count));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyFrom(ReadOnlySpan<T> source)
+            => CopyFrom(0, source);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyFrom(ReadOnlySpan<T> source, int length)
+            => CopyFrom(0, source, length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyFrom(int destinationStartIndex, ReadOnlySpan<T> source)
+            => CopyFrom(destinationStartIndex, source, source.Length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyFrom(int destinationStartIndex, ReadOnlySpan<T> source, int length)
+            => new CopyFromSpan<T>(AsSpan()).CopyFrom(destinationStartIndex, source, length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryCopyFrom(ReadOnlySpan<T> source)
+            => TryCopyFrom(0, source);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryCopyFrom(ReadOnlySpan<T> source, int length)
+            => TryCopyFrom(0, source, length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryCopyFrom(int destinationStartIndex, ReadOnlySpan<T> source)
+            => TryCopyFrom(destinationStartIndex, source, source.Length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryCopyFrom(int destinationStartIndex, ReadOnlySpan<T> source, int length)
+            => new CopyFromSpan<T>(AsSpan()).TryCopyFrom(destinationStartIndex, source, length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(Span<T> destination)
+            => CopyTo(0, destination);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(Span<T> destination, int length)
+            => CopyTo(0, destination, length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(int sourceStartIndex, Span<T> destination)
+            => CopyTo(sourceStartIndex, destination, destination.Length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(int sourceStartIndex, Span<T> destination, int length)
+            => new CopyToSpan<T>(AsReadOnlySpan()).CopyTo(sourceStartIndex, destination, length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryCopyTo(Span<T> destination)
+            => TryCopyTo(0, destination);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryCopyTo(Span<T> destination, int length)
+            => TryCopyTo(0, destination, length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryCopyTo(int sourceStartIndex, Span<T> destination)
+            => TryCopyTo(sourceStartIndex, destination, destination.Length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryCopyTo(int sourceStartIndex, Span<T> destination, int length)
+            => new CopyToSpan<T>(AsReadOnlySpan()).TryCopyTo(sourceStartIndex, destination, length);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public FasterListEnumerator<T> GetEnumerator()
+            => new(this);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int IncreaseCapacityBy(int amount)
+            => IncreaseCapacityTo(_buffer.Length + amount);
+
+        public int IncreaseCapacityTo(int newCapacity)
+        {
+            _version++;
+
+            if (newCapacity <= _buffer.Length)
+            {
+                return _buffer.Length;
+            }
+
+            var newList = new T[newCapacity];
+
+            if (_count > 0)
+            {
+                Array.Copy(_buffer, newList, _count);
+            }
+
+            _buffer = newList;
+            return _buffer.Length;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref readonly T Peek()
+            => ref _buffer[_count - 1];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref readonly T Pop()
+        {
+            _version++;
+            --_count;
+            return ref _buffer[_count];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int Push(T item)
+        {
+            Insert(_count, item);
+            return _count - 1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int Push(in T item)
+        {
+            Insert(_count, item);
+            return _count - 1;
+        }
+
+        public bool Remove(T item)
+        {
+            _version++;
+
+            var index = IndexOf(item);
+
+            if ((uint)index >= (uint)_count)
+            {
+                return false;
+            }
+
+            if (index < --_count)
+            {
+                Array.Copy(_buffer, index + 1, _buffer, index, _count - index);
+            }
+
+            if (EncosyTypeExtensions.IsUnmanaged<T>() == false)
+            {
+                _buffer[_count] = default;
+            }
+
+            return true;
+        }
+
+        public bool Remove(in T item)
+        {
+            _version++;
+
+            var index = IndexOf(in item);
+
+            if ((uint)index >= (uint)_count)
+            {
+                return false;
+            }
+
+            if (index < --_count)
+            {
+                Array.Copy(_buffer, index + 1, _buffer, index, _count - index);
+            }
+
+            if (EncosyTypeExtensions.IsUnmanaged<T>() == false)
+            {
+                _buffer[_count] = default;
+            }
+
+            return true;
+        }
+
+        public void RemoveAt(int index)
+        {
+            ThrowIfRemovalIndexIsOutOfRange((uint)index < (uint)_count);
+
+            _version++;
+
+            if (index < --_count)
+            {
+                Array.Copy(_buffer, index + 1, _buffer, index, _count - index);
+            }
+
+            if (EncosyTypeExtensions.IsUnmanaged<T>() == false)
+            {
+                _buffer[_count] = default;
+            }
+        }
+
+        public void RemoveRange(int startIndex, int length)
+        {
+            var count = _count;
+
+            ThrowIfStartIndexIsOutOfRange((uint)startIndex < (uint)count);
+
+            var end = startIndex + length;
+
+            ThrowIfRemovalRangeIsOutOfRange((uint)end <= (uint)count);
+
+            if (length < 1)
+            {
+                return;
+            }
+
+            _version++;
+
+            count = _count -= length;
+
+            if (startIndex < count)
+            {
+                Array.Copy(_buffer, startIndex + length, _buffer, startIndex, count - startIndex);
+            }
+
+            if (EncosyTypeExtensions.IsUnmanaged<T>() == false)
+            {
+                Array.Clear(_buffer, count, length);
+            }
+        }
+
+        public void RemoveAtSwapBack(int index)
+        {
+            ThrowIfRemovalIndexIsOutOfRange((uint)index < (uint)_count);
+
+            _version++;
+
+            if (index < --_count)
+            {
+                _buffer[index] = _buffer[_count];
+            }
+
+            if (EncosyTypeExtensions.IsUnmanaged<T>() == false)
+            {
+                _buffer[_count] = default;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T[] ToArray()
+            => AsReadOnlySpan().ToArray();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Span<T> AsSpan()
+        {
+            _version++;
+            return _buffer.AsSpan(0, _count);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<T> AsReadOnlySpan()
+            => _buffer.AsSpan(0, _count);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Trim()
+        {
+            _version++;
+
+            if (_count < _buffer.Length)
+            {
+                Array.Resize(ref _buffer, _count);
+            }
+        }
+
+        public Span<T> AddReplicate(int amount, [NotNull] Func<T> createFunc)
+        {
+            _version++;
+
+            var oldCount = _count;
+            var newCount = amount + oldCount;
+            var offset = newCount - _buffer.Length;
+
+            if (offset > 0)
+            {
+                AllocateMore(newCount);
+            }
+
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
+            _count = newCount;
+
+            for (var i = 0; i < amount; i++)
+            {
+                buffer[i] = createFunc();
+            }
+
+            return buffer;
+        }
+
+        public Span<T> AddReplicate(int amount)
+        {
+            _version++;
+
+            var oldCount = _count;
+            var newCount = amount + oldCount;
+            var offset = newCount - _buffer.Length;
+
+            if (offset > 0)
+            {
+                AllocateMore(newCount);
+            }
+
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
+            _count = newCount;
+
+            buffer.Fill(default);
+
+            return buffer;
+        }
+
+        public Span<T> AddReplicate(T value, int amount)
+        {
+            _version++;
+
+            var oldCount = _count;
+            var newCount = amount + oldCount;
+            var offset = newCount - _buffer.Length;
+
+            if (offset > 0)
+            {
+                AllocateMore(newCount);
+            }
+
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
+            _count = newCount;
+
+            buffer.Fill(value);
+
+            return buffer;
+        }
+
+        public Span<T> AddReplicateNoInit(int amount)
+        {
+            _version++;
+
+            var oldCount = _count;
+            var newCount = amount + oldCount;
+            var offset = newCount - _buffer.Length;
+
+            if (offset > 0)
+            {
+                AllocateMore(newCount);
+            }
+
+            var buffer = _buffer.AsSpan().Slice(oldCount, amount);
+            _count = newCount;
+
+            return buffer;
+        }
+
+        /// <summary>
+        /// Sorts the elements in this list. Uses the default comparer and Array.Sort.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Sort()
+            => Sort(0, _count, Comparer<T>.Default);
+
+        /// <summary>
+        /// Sorts the elements in this list. Uses Array.Sort with the provided comparer.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Sort([NotNull] IComparer<T> comparer)
+            => Sort(0, _count, comparer);
+
+        /// <summary>
+        /// Sorts the elements in a section of this list. The sort compares the
+        /// elements to each other using the given IComparer interface. If
+        /// comparer is null, the elements are compared to each other using
+        /// the IComparable interface, which in that case must be implemented by all
+        /// elements of the list.
+        /// <br/>
+        /// This method uses the Array.Sort method to sort the elements.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Sort(int index, int count, [NotNull] IComparer<T> comparer)
+        {
+            ThrowIfSortIndexIsNegative(index >= 0);
+            ThrowIfSortCountIsNegative(count >= 0);
+            ThrowIfSortRangeIsInvalid(_count - index >= count);
+
+            if (count > 1)
+            {
+                Array.Sort(_buffer, index, count, comparer);
+            }
+
+            _version++;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Sort([NotNull] Comparison<T> comparison)
+        {
+            if (_count > 1)
+            {
+                Array.Sort(_buffer, 0, _count, Comparer<T>.Create(comparison));
+            }
+
+            _version++;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FasterList<T> Prefill(int amount, [NotNull] Func<T> createFunc)
+        {
+            var list = new FasterList<T>(amount);
+            list.AddReplicate(amount, createFunc);
+            return list;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FasterList<T> Prefill(int amount)
+        {
+            var list = new FasterList<T>(amount);
+            list.AddReplicate(amount);
+            return list;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FasterList<T> Prefill(T value, int amount)
+        {
+            var list = new FasterList<T>(amount);
+            list.AddReplicate(value, amount);
+            return list;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FasterList<T> PrefillNoInit(int amount)
+        {
+            var list = new FasterList<T>(amount);
+            list.AddReplicateNoInit(amount);
+            return list;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int CalcNewCapacity(int newSize)
+        {
+            newSize = Math.Max(4, newSize);
+            return ((int)Math.Ceiling(newSize * 1.5f) / 4) * 4;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void AllocateMore()
+        {
+            var newCapacity = CalcNewCapacity(_buffer.Length + 1);
+            var newList = new T[newCapacity];
+            if (_count > 0)
+            {
+                Array.Copy(_buffer, newList, _count);
+            }
+            _buffer = newList;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void AllocateMore(int newSize)
+        {
+            ThrowHelper.ThrowIfNewCapacityIsInvalid(newSize > _buffer.Length);
+
+            var newCapacity = CalcNewCapacity(newSize);
+            var newList = new T[newCapacity];
+            if (_count > 0)
+            {
+                Array.Copy(_buffer, newList, _count);
+            }
+            _buffer = newList;
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfIndexIsNegative([DoesNotReturnIf(false)] bool isNonNegative)
+        {
+            if (isNonNegative == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("index is less than 0");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfIndexSectionIsInvalid([DoesNotReturnIf(false)] bool isWithinRange)
+        {
+            if (isWithinRange == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("index and count do not specify a valid section in the FasterList<T>");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfInsertionIndexIsOutOfRange([DoesNotReturnIf(false)] bool isWithinRange)
+        {
+            if (isWithinRange == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("index is outside the range of valid indexes for the FasterList<T>");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfCollectionWasModified([DoesNotReturnIf(false)] bool versionMatches)
+        {
+            if (versionMatches == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("An element in the collection has been modified.");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfRemovalIndexIsOutOfRange([DoesNotReturnIf(false)] bool isWithinRange)
+        {
+            if (isWithinRange == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("out of bound index");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfStartIndexIsOutOfRange([DoesNotReturnIf(false)] bool isWithinRange)
+        {
+            if (isWithinRange == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("out of bound start index");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfRemovalRangeIsOutOfRange([DoesNotReturnIf(false)] bool isWithinRange)
+        {
+            if (isWithinRange == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("out of bound length");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfSortIndexIsNegative([DoesNotReturnIf(false)] bool isNonNegative)
+        {
+            if (isNonNegative == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("'index' must be non-negative number");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfSortCountIsNegative([DoesNotReturnIf(false)] bool isNonNegative)
+        {
+            if (isNonNegative == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("'count' must be non-negative number");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfSortRangeIsInvalid([DoesNotReturnIf(false)] bool isWithinRange)
+        {
+            if (isWithinRange == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("Invalid offset length");
+        }
+
+        [HideInCallstack, StackTraceHidden]
+        [Conditional(UNITY_EDITOR), Conditional(DEBUG)]
+        [Conditional(RUNTIME_CHECKS), Conditional(COLLECTIONS_CHECKS)]
+        [Conditional(UNITY_COLLECTIONS_CHECKS)]
+        private static void ThrowIfNewSizeDoesNotExceedCapacity([DoesNotReturnIf(false)] bool exceedsCapacity)
+        {
+            if (exceedsCapacity == false)
+            {
+                throw CreateException();
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static InvalidOperationException CreateException()
+                => new("newSize is not greater than the current capacity");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+            => new FasterListEnumerator<T>(this);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        IEnumerator IEnumerable.GetEnumerator()
+            => new FasterListEnumerator<T>(this);
+    }
+}

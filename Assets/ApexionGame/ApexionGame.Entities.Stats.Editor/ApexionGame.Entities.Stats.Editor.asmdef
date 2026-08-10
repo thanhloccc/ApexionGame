@@ -1,0 +1,21 @@
+{
+    "name": "ApexionGame.Entities.Stats.Editor",
+    "rootNamespace": "ApexionGame.Entities.Stats.Editor",
+    "references": [
+        "ApexionGame.Entities.Stats",
+        "EncosyTower.Core",
+        "Unity.Collections",
+        "Unity.Mathematics"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

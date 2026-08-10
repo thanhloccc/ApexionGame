@@ -1,0 +1,20 @@
+<Project>
+    <PropertyGroup>
+        <BaseOutputPath>$(MSBuildThisFileDirectory)Build/$(MSBuildProjectName)/bin/</BaseOutputPath>
+        <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)Build/$(MSBuildProjectName)/obj/</BaseIntermediateOutputPath>
+        <ResultsDirectory>$(MSBuildThisFileDirectory)Build/$(MSBuildProjectName)/TestResults/</ResultsDirectory>
+        <LangVersion>10.0</LangVersion>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+    </PropertyGroup>
+
+    <Target Name="CopyBuildArtifacts" AfterTargets="Build"
+            Condition="'$(Configuration)'=='Release' AND '$(MSBuildProjectName)'!='ApexionGame.SourceGen.Tests'">
+        <ItemGroup>
+            <DataFiles Include="$(OutDir)*.dll" />
+        </ItemGroup>
+        <Copy SourceFiles="@(DataFiles)"
+              DestinationFolder="$(MSBuildThisFileDirectory)../../Assets/ApexionGame/ApexionGame.Entities.Stats/SourceGenerators/"
+              SkipUnchangedFiles="true" />
+    </Target>
+
+</Project>

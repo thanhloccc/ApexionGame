@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <RootNamespace>Samples.RpgStats</RootNamespace>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    </PropertyGroup>
+
+    <!--
+        Compiles the Unity sample assembly's own sources through the real generators, outside
+        Unity. Purpose is regression: if a change to the runtime or to a generator breaks the
+        documented usage, `dotnet build` says so in seconds instead of the next domain reload.
+    -->
+    <ItemGroup>
+        <Compile Include="Program.cs" />
+        <Compile Include="$(UnityProjectPath)/Assets/ApexionGame/ApexionGame.Entities.Stats.Samples/*.cs" />
+        <Compile Include="$(UnityProjectPath)/Assets/ApexionGame/ApexionGame.Entities.Stats.Samples/Battle/*.cs" />
+        <Compile Include="$(UnityProjectPath)/Assets/ApexionGame/ApexionGame.Entities.Stats.Samples/Rts/*.cs" />
+        <Compile Include="$(UnityProjectPath)/Assets/ApexionGame/ApexionGame.Entities.Stats.Samples/Views/*.cs" />
+        <!-- Editor/ is deliberately absent: it needs UnityEditor and EncosyTower.Editor, neither of
+             which this netstandard harness references. Unity compiles that assembly. -->
+    </ItemGroup>
+</Project>

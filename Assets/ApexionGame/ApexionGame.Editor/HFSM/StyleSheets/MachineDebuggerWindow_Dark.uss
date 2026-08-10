@@ -1,0 +1,47 @@
+/* The only place literal colours are allowed. */
+
+:root {
+    /* ---- surfaces, darkest to lightest -------------------------------------------------- */
+    --hfsm-bg-chrome: rgb(35, 38, 43);     /* toolbar, section headers */
+    --hfsm-bg-panel: rgb(41, 44, 49);      /* content panels: active path, guards, log, graph */
+    --hfsm-bg-row-alt: rgb(47, 51, 57);    /* zebra striping */
+    --hfsm-bg-row-hover: rgb(52, 56, 63);
+    --hfsm-bg-input: rgb(30, 32, 36);
+
+    --hfsm-border: rgb(20, 22, 26);        /* panel-to-panel seams */
+    --hfsm-border-soft: rgb(51, 55, 62);   /* dividers within a panel */
+
+    /* ---- text ---------------------------------------------------------------------------- */
+    --hfsm-text: rgb(231, 233, 236);
+    --hfsm-text-muted: rgb(144, 149, 157);
+    --hfsm-text-faint: rgb(91, 95, 102);
+
+    /* ---- accent: the active/live-path colour ---------------------------------------------- */
+    --hfsm-accent: rgb(79, 209, 197);
+    --hfsm-accent-strong: rgb(55, 184, 172);
+    --hfsm-accent-tint: rgba(79, 209, 197, 0.16);
+
+    /* ---- focus: selection, the thing the user just clicked --------------------------------- */
+    --hfsm-focus: rgb(242, 184, 75);
+    --hfsm-focus-tint: rgba(242, 184, 75, 0.18);
+
+    /* ---- semantic: guard markers ------------------------------------------------------------ */
+    --hfsm-success: rgb(74, 222, 128);      /* eligible -- would fire */
+    --hfsm-success-tint: rgba(74, 222, 128, 0.16);
+    --hfsm-warning: rgb(242, 184, 75);      /* blocked by MinDuration */
+    --hfsm-warning-tint: rgba(242, 184, 75, 0.16);
+    --hfsm-trigger: rgb(167, 139, 250);     /* trigger-armed, trigger edges */
+    --hfsm-trigger-tint: rgba(167, 139, 250, 0.16);
+    --hfsm-danger: rgb(248, 113, 113);      /* unmatched trigger */
+    --hfsm-danger-tint: rgba(248, 113, 113, 0.14);
+
+    /* ---- graph ------------------------------------------------------------------------------ */
+    --hfsm-graph-bg: rgb(32, 34, 38);
+    --hfsm-graph-node-bg: rgb(45, 48, 54);
+    --hfsm-graph-edge: rgb(120, 128, 140);
+
+    /* ---- buttons / inputs -------------------------------------------------------------------- */
+    --hfsm-button-bg: rgb(44, 48, 54);
+    --hfsm-button-bg-hover: rgb(52, 57, 64);
+    --hfsm-input-border: rgb(64, 68, 75);
+}

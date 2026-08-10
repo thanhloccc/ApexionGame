@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>12</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+        <PackageReference Include="MSTest.TestAdapter" Version="3.7.3" />
+        <PackageReference Include="MSTest.TestFramework" Version="3.7.3" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.1" />
+        <!-- Code refactorings operate on a Document, which only exists in the Workspaces layer. -->
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../ApexionGame.SourceGen.Common/ApexionGame.SourceGen.Common.csproj" />
+        <ProjectReference Include="../ApexionGame.SourceGen.Helpers/ApexionGame.SourceGen.Helpers.csproj" />
+        <ProjectReference Include="../ApexionGame.SourceGen.Generators/ApexionGame.SourceGen.Generators.csproj" />
+        <ProjectReference Include="../ApexionGame.SourceGen.Analyzers/ApexionGame.SourceGen.Analyzers.csproj"
+                          ReferenceOutputAssembly="true" OutputItemType="" />
+        <ProjectReference Include="../ApexionGame.SourceGen.CodeRefactors/ApexionGame.SourceGen.CodeRefactors.csproj"
+                          ReferenceOutputAssembly="true" OutputItemType="" />
+    </ItemGroup>
+
+    <Import Project="UnityDllPaths.targets" />
+
+</Project>
