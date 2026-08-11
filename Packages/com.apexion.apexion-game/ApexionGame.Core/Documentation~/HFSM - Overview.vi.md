@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Đang triển khai — phase 1–7 đã xong và có test, 8–10 còn treo** ([Roadmap](HFSM%20-%20Roadmap.vi.md#1-phase)) |
 | Assembly đích | `ApexionGame.Core` (+ `.Editor`, `.Tests`, `.Samples`, `.Samples.Editor`, `.Authoring`) |
-| Thư mục module | `Assets/ApexionGame/ApexionGame.Core/HFSM/` |
+| Thư mục module | `Packages/com.apexion.apexion-game/ApexionGame.Core/HFSM/` |
 | Namespace đích | `ApexionGame.HFSM` ([DEC-001](HFSM%20-%20Decisions.vi.md#dec-001)) |
 | Đặt tên type | Không viết tắt: `HierarchicalStateMachine` · `Machine*` · tên trần ([DEC-019](HFSM%20-%20Decisions.vi.md#dec-019)) |
 | Module EncosyTower | EnumExtensions, TypeWraps, PolyEnumStructs, Common (`Result`/`Option`), Collections, Pooling, Tasks, Types (`TypeId`), Logging, Debugging, UIElements, Editor.UIElements |
@@ -23,7 +23,7 @@
 Sau khi phần port `Entities.Stats` đã đóng (xong phase 5, 95/95 test xanh), dựng một **máy trạng
 thái hữu hạn phân cấp** để studio tái dùng cho các game sau. Bốn yêu cầu, đúng lời người đặt:
 *dễ dùng*, *code logic rõ ràng clean*, *high performance*, và *có Debugging*. Đặt tại
-`Assets/ApexionGame/ApexionGame.Core/HFSM`.
+`Packages/com.apexion.apexion-game/ApexionGame.Core/HFSM`.
 
 Hai vòng hỏi đã chốt hình dạng:
 
@@ -47,7 +47,7 @@ Hai thứ dứt khoát **không** phải: behaviour tree, và trình soạn node
 ### 2.1 Trên đĩa sẽ có gì khi xong
 
 ```
-Assets/ApexionGame/
+Packages/com.apexion.apexion-game/
 ├── ApexionGame.Core/                          ← sửa asmdef: thêm khối versionDefines
 │   ├── ApexionGame.Core.asmdef
 │   ├── Documentation~/                        ← bộ doc này

@@ -12,7 +12,7 @@ Two independent reasons are recorded in the code:
 
 - **Editor UI** — a `VisualElement` subclass is reusable, unit-addressable, and gets USS class-name
   constants, which UXML cannot express as strongly.
-- **Runtime UI** — `Assets/ApexionGame/…/Rts.Game/Hud/RtsWidgets.cs` states it outright: *"A UXML
+- **Runtime UI** — `Packages/com.apexion.apexion-game/Samples~/ApexionGame.Entities.Stats.Samples.Rts/Rts.Game/Hud/RtsWidgets.cs` states it outright: *"A UXML
   asset's main-object id is content-derived, so a hand-authored scene cannot reference one reliably
   — and the scene here is hand-authored precisely so it stays readable in a diff."*
 
@@ -21,7 +21,8 @@ layout in UI Builder, and say why.
 
 ## 2. Folder layout
 
-The project's own reference implementation is `Assets/ApexionGame/ApexionGame.Entities.Stats.Editor`:
+The project's own reference implementation is
+`Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats.Editor`:
 
 ```text
 ApexionGame.Entities.Stats.Editor/
@@ -38,7 +39,7 @@ ApexionGame.Entities.Stats.Editor/
 ```
 
 Runtime UI drops the `StyleSheets/` folder when it styles inline —
-`Assets/ApexionGame/…/Rts.Game/Hud/` holds `RtsHud.cs`, one file per panel
+`Packages/com.apexion.apexion-game/Samples~/ApexionGame.Entities.Stats.Samples.Rts/Rts.Game/Hud/` holds `RtsHud.cs`, one file per panel
 (`RtsTopBar`, `RtsSpellBar`, `RtsJournalPanel`, …), plus `RtsHudTheme.cs`, `RtsWidgets.cs`, and
 `Ui/RtsPanelSettings.asset`.
 

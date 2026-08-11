@@ -18,7 +18,7 @@ namespace ApexionGame.Entities.Stats.Editor
     /// </remarks>
     internal sealed class StatDebuggerWindow : EditorWindow
     {
-        private const string MODULE_ROOT = "Assets/ApexionGame/ApexionGame.Entities.Stats.Editor";
+        private const string MODULE_ROOT = "Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats.Editor";
         private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
         private const string FILE_NAME = nameof(StatDebuggerWindow);
 

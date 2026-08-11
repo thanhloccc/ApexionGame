@@ -2,6 +2,12 @@
 
 *[Tiếng Việt](Core%20Package%20-%20Overview.vi.md)*
 
+> **Superseded.** This plan was executed — see [`Package Setup - Overview.md`](Package%20Setup%20-%20Overview.md)
+> for what actually shipped, including one deviation from this doc's plan: `ApexionGame.Entities.Stats.Samples.Rts`
+> stayed a live module instead of moving under `Samples~/`, because `ApexionGame.Tests.EditorMode`
+> regression-tests it directly and Unity never compiles anything under a `Samples~/` folder. Kept
+> below for the original request context and decision trail.
+
 ## Status
 
 | | |

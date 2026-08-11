@@ -11,10 +11,10 @@
     -->
     <ItemGroup>
         <Compile Include="Program.cs" />
-        <Compile Include="$(UnityProjectPath)/Assets/ApexionGame/ApexionGame.Entities.Stats.Samples/*.cs" />
-        <Compile Include="$(UnityProjectPath)/Assets/ApexionGame/ApexionGame.Entities.Stats.Samples/Battle/*.cs" />
-        <Compile Include="$(UnityProjectPath)/Assets/ApexionGame/ApexionGame.Entities.Stats.Samples/Rts/*.cs" />
-        <Compile Include="$(UnityProjectPath)/Assets/ApexionGame/ApexionGame.Entities.Stats.Samples/Views/*.cs" />
+        <Compile Include="$(UnityProjectPath)/Packages/com.apexion.apexion-game/Samples~/ApexionGame.Entities.Stats.Samples.Rts/*.cs" />
+        <Compile Include="$(UnityProjectPath)/Packages/com.apexion.apexion-game/Samples~/ApexionGame.Entities.Stats.Samples.Rts/Battle/*.cs" />
+        <Compile Include="$(UnityProjectPath)/Packages/com.apexion.apexion-game/Samples~/ApexionGame.Entities.Stats.Samples.Rts/Rts/*.cs" />
+        <Compile Include="$(UnityProjectPath)/Packages/com.apexion.apexion-game/Samples~/ApexionGame.Entities.Stats.Samples.Rts/Views/*.cs" />
         <!-- Editor/ is deliberately absent: it needs UnityEditor and EncosyTower.Editor, neither of
              which this netstandard harness references. Unity compiles that assembly. -->
     </ItemGroup>

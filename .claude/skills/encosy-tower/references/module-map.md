@@ -303,5 +303,6 @@ DOTS stat system: `[StatCollection]`, `[StatData]`, `[StatSystem]`, `StatAccesso
 `StatBaker`, `StatJobs`, `StatWorldData`, `StatHandle`, `StatModifierHandle`, `StatModifierRecord`,
 `StatVariant`, `IStat`, `IStatModifier`, `IStatModifierStack`, `IStatObserver`, `StatChangeEvent`,
 `ModifierTriggerEvent`, `ObserverRange`.
-**This project maintains its own DOTS-free fork** at `Assets/ApexionGame/ApexionGame.Entities.Stats`
+**This project maintains its own DOTS-free fork** at
+`Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats`
 — see `setup.md`.

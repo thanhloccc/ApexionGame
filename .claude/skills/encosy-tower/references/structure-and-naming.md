@@ -212,7 +212,7 @@ For `MonoBehaviour` / `ScriptableObject`, serialized fields come first:
 ## 9. Applying this to Land of Souls
 
 Gameplay assemblies are `Assets/Game/Game.Common` and `Assets/Game/Game.Gameplay`; shared
-project code is `Assets/ApexionGame/ApexionGame.Core`. Assembly name = `rootNamespace` = folder name
+project code is `Packages/com.apexion.apexion-game/ApexionGame.Core`. Assembly name = `rootNamespace` = folder name
 in each.
 
 A new feature inside `Game.Gameplay` should look like:

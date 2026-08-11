@@ -5,7 +5,7 @@ Re-check the repository because package versions and defines can change.
 - Unity project version is defined by `ProjectSettings/ProjectVersion.txt`.
 - EncosyTower lives at `Packages/com.laicasaane.encosy-tower` and is the standard library.
 - `com.unity.entities` is absent. EncosyTower Entities modules are compiled out.
-- `Assets/ApexionGame/ApexionGame.Entities.Stats` is a deliberate DOTS-free fork. Edit the fork; do not install Entities or sync it back to the package implementation.
+- `Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats` is a deliberate DOTS-free fork. Edit the fork; do not install Entities or sync it back to the package implementation.
 - Gameplay assemblies began as greenfield scaffolding: `Game.Common`, `Game.Gameplay`, and `ApexionGame.Core`. Inspect current state rather than assuming they remain empty.
 - New assemblies normally reference `EncosyTower.Core` and must copy the relevant `versionDefines` from `EncosyTower.Core.asmdef` so conditional symbols resolve consistently.
 - Add `EncosyTower.Mvvm`, `EncosyTower.Core.Extended`, editor assemblies, or Unity packages only when the selected module requires them.

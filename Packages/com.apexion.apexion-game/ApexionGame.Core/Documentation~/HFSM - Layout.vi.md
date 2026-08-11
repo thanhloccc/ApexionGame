@@ -61,9 +61,9 @@ Kế hoạch ban đầu là sáu anh em. Thực tế tồn tại, tính đến h
 
 | Assembly | Thư mục | Tham chiếu | Mục đích |
 |---|---|---|---|
-| `ApexionGame.Core` | `Assets/ApexionGame/ApexionGame.Core/` | `EncosyTower.Core`, `UniTask`, `Unity.Burst`, `Unity.Collections`, `Unity.Mathematics` (đã có sẵn) | runtime |
-| `ApexionGame.Editor` | `Assets/ApexionGame/ApexionGame.Editor/` | `ApexionGame.Core`, `EncosyTower.Core`, `EncosyTower.Editor` | assembly editor **dùng chung** cho mọi module `ApexionGame.*` — `MachineDebuggerWindow` nằm ở đây dưới `ApexionGame.HFSM.Editor`, không phải một `ApexionGame.Core.Editor` riêng |
-| `ApexionGame.Tests.EditorMode` | `Assets/ApexionGame/ApexionGame.Tests.EditorMode/ApexionGame.Core/HFSM/` | assembly test chung của cả project | golden test + benchmark, cùng chỗ với test của module Stats |
+| `ApexionGame.Core` | `Packages/com.apexion.apexion-game/ApexionGame.Core/` | `EncosyTower.Core`, `UniTask`, `Unity.Burst`, `Unity.Collections`, `Unity.Mathematics` (đã có sẵn) | runtime |
+| `ApexionGame.Editor` | `Packages/com.apexion.apexion-game/ApexionGame.Editor/` | `ApexionGame.Core`, `EncosyTower.Core`, `EncosyTower.Editor` | assembly editor **dùng chung** cho mọi module `ApexionGame.*` — `MachineDebuggerWindow` nằm ở đây dưới `ApexionGame.HFSM.Editor`, không phải một `ApexionGame.Core.Editor` riêng |
+| `ApexionGame.Tests.EditorMode` | `Packages/com.apexion.apexion-game/ApexionGame.Tests.EditorMode/ApexionGame.Core/HFSM/` | assembly test chung của cả project | golden test + benchmark, cùng chỗ với test của module Stats |
 
 `ApexionGame.Core.Authoring`, `.Samples` và `.Samples.Editor` (phase 9 và phase 8) chưa được tạo —
 chúng vẫn sẽ là assembly anh em riêng như kế hoạch gốc khi các phase đó bắt đầu, vì không có gì
@@ -93,7 +93,7 @@ thì không tốn gì và khớp `ApexionGame.Entities.Stats`.
 ## 3. Cây runtime
 
 ```
-Assets/ApexionGame/ApexionGame.Core/
+Packages/com.apexion.apexion-game/ApexionGame.Core/
 ├── ApexionGame.Core.asmdef
 ├── AssemblyInfo.cs                          InternalsVisibleTo → .Tests, .Editor, .Authoring
 ├── Documentation~/                          bộ doc này (không .meta — Unity bỏ qua `~`)
@@ -178,7 +178,7 @@ Bề mặt debug là một `using` thứ hai, chọn tham gia một cách có ch
 Nằm trong assembly editor dùng chung `ApexionGame.Editor` (§2), không phải một anh em riêng:
 
 ```
-Assets/ApexionGame/ApexionGame.Editor/
+Packages/com.apexion.apexion-game/ApexionGame.Editor/
 ├── ApexionGame.Editor.asmdef                includePlatforms: [Editor]
 ├── MachineDebuggerWindow.cs                    menu: ApexionGame > HFSM > Debugger
 ├── Views/
@@ -223,7 +223,7 @@ private ngay trên `HierarchicalStateMachine`2+Debug.cs`.
 ## 5. Ba assembly còn lại
 
 ```
-Assets/ApexionGame/ApexionGame.Core.Authoring/
+Packages/com.apexion.apexion-game/ApexionGame.Core.Authoring/
 ├── ApexionGame.Core.Authoring.asmdef
 ├── MachineGraphAsset.cs                        ScriptableObject: node + transition đã serialize
 ├── MachineGraphAsset+ToDefinition.cs           asset → MachineDefinition, trả Result
@@ -233,7 +233,7 @@ Assets/ApexionGame/ApexionGame.Core.Authoring/
     ├── StateNodeRecord.cs                    hàng authoring [Serializable]
     └── TransitionRecord.cs
 
-Assets/ApexionGame/ApexionGame.Core.Tests/
+Packages/com.apexion.apexion-game/ApexionGame.Core.Tests/
 ├── ApexionGame.Core.Tests.asmdef
 ├── MachineErrorTests.cs
 ├── MachineBuilderValidationTests.cs            mỗi case MachineError một test
@@ -251,7 +251,7 @@ Assets/ApexionGame/ApexionGame.Core.Tests/
     ├── TestStates.cs                        các enum dùng chung trong test
     └── RecordingBehaviour.cs                nối "Enter:Chase" v.v. vào một StringBuilder chung
 
-Assets/ApexionGame/ApexionGame.Core.Samples/
+Packages/com.apexion.apexion-game/ApexionGame.Core.Samples/
 ├── ApexionGame.Core.Samples.asmdef
 ├── MachinePlaygroundWorld.cs                   C# thuần, IDisposable, mỗi tình huống một hàm
 ├── MachinePlayground.cs                        MonoBehaviour [ExecuteAlways]
@@ -265,7 +265,7 @@ Assets/ApexionGame/ApexionGame.Core.Samples/
     ├── hfsm-playground.unity                viết tay, .meta GUID cố định
     └── hfsm-playground.unity.meta
 
-Assets/ApexionGame/ApexionGame.Core.Samples.Editor/
+Packages/com.apexion.apexion-game/ApexionGame.Core.Samples.Editor/
 ├── ApexionGame.Core.Samples.Editor.asmdef
 └── MachinePlaygroundEditor.cs                  mười nút, System.Action, không phải Invoke(name)
 ```
@@ -289,7 +289,7 @@ Plugins/SourceGenerator.ApexionGame/
     └── HierarchicalStateMachineMachineSkeletonRefactoring.cs
 ```
 
-Deploy vào `Assets/ApexionGame/ApexionGame.Entities.Stats/SourceGenerators/` cạnh các DLL sẵn có, qua
+Deploy vào `Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats/SourceGenerators/` cạnh các DLL sẵn có, qua
 target MSBuild `CopyBuildArtifacts` đã dựng. Label `.meta`: `RunOnlyOnAssembliesWithReference` +
 `RoslynAnalyzer`, **không** có label `SourceGenerator` — một provider code refactoring không phát code
 lúc biên dịch. `isExplicitlyReferenced: 1`, mọi platform `enabled: 0`.

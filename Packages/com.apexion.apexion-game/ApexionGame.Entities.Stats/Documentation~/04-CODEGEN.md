@@ -123,7 +123,7 @@ port phase 3 chưa làm, để phase 5 (task 5.3).
 
 ## 4.4 Deploy vào Unity
 
-Đích: `Assets/ApexionGame/ApexionGame.Entities.Stats/SourceGenerators/`
+Đích: `Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats/SourceGenerators/`
 
 ```
 SourceGenerators/
@@ -196,7 +196,7 @@ Tác giả không có `build.ps1`. Tất cả nằm trong một `Directory.Build
             <DataFiles Include="$(OutDir)*.dll" />
         </ItemGroup>
         <Copy SourceFiles="@(DataFiles)"
-              DestinationFolder="$(MSBuildThisFileDirectory)../../Assets/ApexionGame/ApexionGame.Entities.Stats/SourceGenerators/"
+              DestinationFolder="$(MSBuildThisFileDirectory)../../Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats/SourceGenerators/"
               SkipUnchangedFiles="true" />
     </Target>
 </Project>
@@ -352,7 +352,7 @@ Không có cái này thì debug generator = `Debug.Log` qua diagnostic. Rất n�
 ### 4.6.2 Layout
 
 ```
-Assets/ApexionGame/ApexionGame.Entities.Stats/Generators/
+Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats/Generators/
 ├── StatTypeTable.cs                       # ★ NGUỒN DUY NHẤT (C# thuần, type-checked)
 ├── StatVariantTypeGenerator.cs            → ../Common/StatVariantType.gen.cs
 ├── StatVariantGenerator.cs                → ../Common/StatVariant.gen.cs

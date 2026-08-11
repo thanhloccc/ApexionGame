@@ -13,7 +13,7 @@ This is durable project context. Verify dated or changeable facts against the re
 
 - EncosyTower at `Packages/com.laicasaane.encosy-tower` is the standard library, not an optional utility collection.
 - DOTS/Unity Entities is not installed unless the current manifest proves otherwise. Player define leftovers are not evidence that DOTS is active.
-- `Assets/ApexionGame/ApexionGame.Entities.Stats` is a deliberate DOTS-free fork. Never repair it by installing Unity Entities or replacing it with the package's ECS version.
+- `Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats` is a deliberate DOTS-free fork. Never repair it by installing Unity Entities or replacing it with the package's ECS version.
 - `Game.Common`, `Game.Gameplay`, and `ApexionGame.Core` started as greenfield assemblies. Inspect current contents before relying on that historical state.
 - New asmdefs must receive the required EncosyTower references and matching relevant `versionDefines`, or guarded code can silently disappear.
 - Any type carrying an EncosyTower source-generator attribute must be `partial`. Generated accessor properties use the package's `Get_X`/`Set_X` forwarding pattern. Never hand-edit `.gen.cs`.

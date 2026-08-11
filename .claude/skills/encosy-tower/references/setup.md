@@ -26,7 +26,7 @@ that make them meaningful are not installed — they are leftovers, not a signal
 
 ## This project's own layer
 
-- `Assets/ApexionGame/ApexionGame.Entities.Stats` — **a DOTS-free fork of
+- `Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats` — **a DOTS-free fork of
   `EncosyTower.Entities.Stats`.** Its asmdef references only `EncosyTower.Core`, Burst, Collections,
   Mathematics — no `Unity.Entities`. Storage was rewritten around `StatBuffer<T>` /
   `StatBufferLookup<T>` / `StatOwnerHandle` / `StatOwnerSlot` instead of ECS chunks, and it adds

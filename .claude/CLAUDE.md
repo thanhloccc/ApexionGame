@@ -160,8 +160,12 @@ Copy EncosyTower's organization. Decide placement before creating files.
 - **DOTS is not installed.** `com.unity.entities` is absent from `Packages/manifest.json`, so
   `EncosyTower.Entities.Stats` and `EncosyTower.Core/Entities` are compiled out. `ENTITY_STORE_V1`
   and `LATIOS_ENTITIES_1_4` in Player defines are leftovers, not a signal that DOTS is active.
-- **`Assets/ApexionGame/ApexionGame.Entities.Stats` is a deliberate DOTS-free fork** of the package's
-  stats system. Edit it there; never "fix" it by adding Unity.Entities or syncing it to the package.
+- **`ApexionGame.*` (HFSM core + Entities.Stats fork) lives in the embedded package
+  `Packages/com.apexion.apexion-game/`**, not under `Assets/`. `Assets/Game/*` is the game itself and
+  consumes both `com.laicasaane.encosy-tower` and `com.apexion.apexion-game`.
+- **`Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats` is a deliberate DOTS-free fork** of
+  the package's stats system. Edit it there; never "fix" it by adding Unity.Entities or syncing it to
+  the package.
 - **Gameplay assemblies (verify current contents before relying on this list):**
   `Game.Common` (ids, shared types, stat facade) → `Game.Data` (+ `.Authoring`; Databases tables,
   Persistences) → `Game.Gameplay` (+ `.Editor`, `.Tests`; Player, Weapons, Equipment) plus
@@ -183,6 +187,6 @@ Copy EncosyTower's organization. Decide placement before creating files.
 - Skills available: `encosy-tower` and `unity-cli-workflow`, both project-level.
 - Feature docs: `Documentation~/` of the owning assembly (e.g.
   `Assets/Game/Game.Gameplay/Documentation~/`). Existing example of the project's doc culture:
-  `Assets/ApexionGame/ApexionGame.Entities.Stats/Documentation~/`.
+  `Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats/Documentation~/`.
 - Memory: `.claude/memory/` — index in `MEMORY.md`, one fact per file.
 - Package samples (best ground truth): `Packages/com.laicasaane.encosy-tower/Samples~/`.

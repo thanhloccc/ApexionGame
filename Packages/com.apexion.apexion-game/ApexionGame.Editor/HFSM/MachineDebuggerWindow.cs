@@ -13,7 +13,7 @@ namespace ApexionGame.HFSM.Editor
     /// </summary>
     internal sealed class MachineDebuggerWindow : EditorWindow
     {
-        private const string MODULE_ROOT = "Assets/ApexionGame/ApexionGame.Editor";
+        private const string MODULE_ROOT = "Packages/com.apexion.apexion-game/ApexionGame.Editor";
         private const string STYLE_SHEETS_PATH = $"{MODULE_ROOT}/StyleSheets";
         private const string FILE_NAME = nameof(MachineDebuggerWindow);
 

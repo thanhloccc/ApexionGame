@@ -12,7 +12,8 @@ As of 2026-08-09 the gameplay code is no longer greenfield. The chain, in depend
 - `Assets/Game/Game.Data` (+ `Game.Data.Authoring`) — EncosyTower Databases tables
   (Equipment, Player, Weapons) and Persistences (`GamePersistence`, `PlayerDataAccessor`).
 - `Assets/Game/Game.Gameplay` (+ `.Editor`, `.Tests`) — Player, Weapons, Equipment systems.
-- `Assets/Game/Game.Input`, `Assets/ApexionGame/ApexionGame.Core` — input and shared project code.
+- `Assets/Game/Game.Input`, `Packages/com.apexion.apexion-game/ApexionGame.Core` — input and shared
+  project code (the latter is now an embedded package, not under `Assets/`).
 
 **Why:** the first implementations have landed, so new work matches an existing pattern instead of
 inventing one. Reading the neighbouring system beats designing from scratch — and replaces the older

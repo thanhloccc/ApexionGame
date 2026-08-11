@@ -8,7 +8,7 @@
 |---|---|
 | Phase | **Implementing — phases 1–7 done and tested, 8–10 pending** ([Roadmap](HFSM%20-%20Roadmap.md#1-phases)) |
 | Target assembly | `ApexionGame.Core` (+ `.Editor`, `.Tests`, `.Samples`, `.Samples.Editor`, `.Authoring`) |
-| Module folder | `Assets/ApexionGame/ApexionGame.Core/HFSM/` |
+| Module folder | `Packages/com.apexion.apexion-game/ApexionGame.Core/HFSM/` |
 | Target namespace | `ApexionGame.HFSM` ([DEC-001](HFSM%20-%20Decisions.md#dec-001)) |
 | Type naming | No abbreviation: `HierarchicalStateMachine` · `Machine*` · bare ([DEC-019](HFSM%20-%20Decisions.md#dec-019)) |
 | EncosyTower modules | EnumExtensions, TypeWraps, PolyEnumStructs, Common (`Result`/`Option`), Collections, Pooling, Tasks, Types (`TypeId`), Logging, Debugging, UIElements, Editor.UIElements |
@@ -24,7 +24,7 @@ Now that the `Entities.Stats` port is closed (phase 5 done, 95/95 tests green), 
 finite state machine** that this studio can reuse across future titles. The four stated qualities,
 in the user's words: *dễ dùng* (easy to use), *code logic rõ ràng clean* (clear, clean logic),
 *high performance*, and *có Debugging* (real debugging). It lives in
-`Assets/ApexionGame/ApexionGame.Core/HFSM`.
+`Packages/com.apexion.apexion-game/ApexionGame.Core/HFSM`.
 
 The question rounds settled the shape:
 
@@ -48,7 +48,7 @@ Two things this explicitly is **not**: a behaviour tree, and a visual node-graph
 ### 2.1 What exists on disk when this is done
 
 ```
-Assets/ApexionGame/
+Packages/com.apexion.apexion-game/
 ├── ApexionGame.Core/                          ← asmdef fixed: versionDefines block added
 │   ├── ApexionGame.Core.asmdef
 │   ├── Documentation~/                        ← this doc set

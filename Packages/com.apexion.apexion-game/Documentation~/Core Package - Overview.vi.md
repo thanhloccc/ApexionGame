@@ -2,6 +2,12 @@
 
 *[English](Core%20Package%20-%20Overview.md)*
 
+> **Đã thay thế.** Plan này đã được thực thi — xem [`Package Setup - Overview.vi.md`](Package%20Setup%20-%20Overview.vi.md)
+> để biết thực tế đã triển khai, gồm một điểm khác so với plan gốc ở đây: `ApexionGame.Entities.Stats.Samples.Rts`
+> giữ lại dạng module live thay vì chuyển vào `Samples~/`, vì `ApexionGame.Tests.EditorMode` test hồi
+> quy trực tiếp vào nó và Unity không compile bất cứ gì trong `Samples~/`. Giữ lại nội dung bên dưới
+> để có bối cảnh yêu cầu gốc và quá trình ra quyết định.
+
 ## Trạng thái
 
 | | |

@@ -60,9 +60,9 @@ Originally planned as six siblings. What actually exists, as of phases 1–7:
 
 | Assembly | Folder | References | Purpose |
 |---|---|---|---|
-| `ApexionGame.Core` | `Assets/ApexionGame/ApexionGame.Core/` | `EncosyTower.Core`, `UniTask`, `Unity.Burst`, `Unity.Collections`, `Unity.Mathematics` (already present) | the runtime |
-| `ApexionGame.Editor` | `Assets/ApexionGame/ApexionGame.Editor/` | `ApexionGame.Core`, `EncosyTower.Core`, `EncosyTower.Editor` | **shared** editor assembly for every `ApexionGame.*` module — `MachineDebuggerWindow` lives here under `ApexionGame.HFSM.Editor`, not in a dedicated `ApexionGame.Core.Editor` |
-| `ApexionGame.Tests.EditorMode` | `Assets/ApexionGame/ApexionGame.Tests.EditorMode/ApexionGame.Core/HFSM/` | project-wide test assembly | golden tests + benchmark, alongside the Stats module's tests under the same assembly |
+| `ApexionGame.Core` | `Packages/com.apexion.apexion-game/ApexionGame.Core/` | `EncosyTower.Core`, `UniTask`, `Unity.Burst`, `Unity.Collections`, `Unity.Mathematics` (already present) | the runtime |
+| `ApexionGame.Editor` | `Packages/com.apexion.apexion-game/ApexionGame.Editor/` | `ApexionGame.Core`, `EncosyTower.Core`, `EncosyTower.Editor` | **shared** editor assembly for every `ApexionGame.*` module — `MachineDebuggerWindow` lives here under `ApexionGame.HFSM.Editor`, not in a dedicated `ApexionGame.Core.Editor` |
+| `ApexionGame.Tests.EditorMode` | `Packages/com.apexion.apexion-game/ApexionGame.Tests.EditorMode/ApexionGame.Core/HFSM/` | project-wide test assembly | golden tests + benchmark, alongside the Stats module's tests under the same assembly |
 
 `ApexionGame.Core.Authoring`, `.Samples` and `.Samples.Editor` (phases 9 and 8 respectively) have
 not been created yet — they remain sibling assemblies as originally planned once those phases
@@ -94,7 +94,7 @@ nothing and matches `ApexionGame.Entities.Stats`.
 ## 3. Runtime tree
 
 ```
-Assets/ApexionGame/ApexionGame.Core/
+Packages/com.apexion.apexion-game/ApexionGame.Core/
 ├── ApexionGame.Core.asmdef
 ├── AssemblyInfo.cs                          InternalsVisibleTo → .Tests, .Editor, .Authoring
 ├── Documentation~/                          this doc set (no .meta — Unity ignores `~`)
@@ -180,7 +180,7 @@ behaviours, the enums and the errors. The debug surface is a second, deliberate 
 Lives in the shared `ApexionGame.Editor` assembly (§2), not a dedicated sibling:
 
 ```
-Assets/ApexionGame/ApexionGame.Editor/
+Packages/com.apexion.apexion-game/ApexionGame.Editor/
 ├── ApexionGame.Editor.asmdef                includePlatforms: [Editor]
 ├── MachineDebuggerWindow.cs                    menu: ApexionGame > HFSM > Debugger
 ├── Views/
@@ -225,7 +225,7 @@ Stylesheet paths are `const` strings built from `nameof(MachineDebuggerWindow)`,
 ## 5. The other three assemblies
 
 ```
-Assets/ApexionGame/ApexionGame.Core.Authoring/
+Packages/com.apexion.apexion-game/ApexionGame.Core.Authoring/
 ├── ApexionGame.Core.Authoring.asmdef
 ├── MachineGraphAsset.cs                        ScriptableObject: serialized nodes + transitions
 ├── MachineGraphAsset+ToDefinition.cs           asset → MachineDefinition, returns Result
@@ -235,7 +235,7 @@ Assets/ApexionGame/ApexionGame.Core.Authoring/
     ├── StateNodeRecord.cs                    [Serializable] authoring row
     └── TransitionRecord.cs
 
-Assets/ApexionGame/ApexionGame.Core.Tests/
+Packages/com.apexion.apexion-game/ApexionGame.Core.Tests/
 ├── ApexionGame.Core.Tests.asmdef
 ├── MachineErrorTests.cs
 ├── MachineBuilderValidationTests.cs            one test per MachineError case
@@ -253,7 +253,7 @@ Assets/ApexionGame/ApexionGame.Core.Tests/
     ├── TestStates.cs                        the enums used across tests
     └── RecordingBehaviour.cs                appends "Enter:Chase" etc. to a shared StringBuilder
 
-Assets/ApexionGame/ApexionGame.Core.Samples/
+Packages/com.apexion.apexion-game/ApexionGame.Core.Samples/
 ├── ApexionGame.Core.Samples.asmdef
 ├── MachinePlaygroundWorld.cs                   plain C#, IDisposable, one method per scenario
 ├── MachinePlayground.cs                        [ExecuteAlways] MonoBehaviour
@@ -267,7 +267,7 @@ Assets/ApexionGame/ApexionGame.Core.Samples/
     ├── hfsm-playground.unity                hand-written, fixed .meta GUID
     └── hfsm-playground.unity.meta
 
-Assets/ApexionGame/ApexionGame.Core.Samples.Editor/
+Packages/com.apexion.apexion-game/ApexionGame.Core.Samples.Editor/
 ├── ApexionGame.Core.Samples.Editor.asmdef
 └── MachinePlaygroundEditor.cs                  ten buttons, System.Action, not Invoke(name)
 ```
@@ -291,7 +291,7 @@ Plugins/SourceGenerator.ApexionGame/
     └── HierarchicalStateMachineMachineSkeletonRefactoring.cs
 ```
 
-Deployed to `Assets/ApexionGame/ApexionGame.Entities.Stats/SourceGenerators/` alongside the existing
+Deployed to `Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats/SourceGenerators/` alongside the existing
 DLLs, via the established `CopyBuildArtifacts` MSBuild target. `.meta` labels:
 `RunOnlyOnAssembliesWithReference` + `RoslynAnalyzer`, **no** `SourceGenerator` label — a code
 refactoring provider does not emit code at compile time. `isExplicitlyReferenced: 1`, every platform

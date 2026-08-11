@@ -13,7 +13,7 @@
             <DataFiles Include="$(OutDir)*.dll" />
         </ItemGroup>
         <Copy SourceFiles="@(DataFiles)"
-              DestinationFolder="$(MSBuildThisFileDirectory)../../Assets/ApexionGame/ApexionGame.Entities.Stats/SourceGenerators/"
+              DestinationFolder="$(MSBuildThisFileDirectory)../../Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats/SourceGenerators/"
               SkipUnchangedFiles="true" />
     </Target>
 

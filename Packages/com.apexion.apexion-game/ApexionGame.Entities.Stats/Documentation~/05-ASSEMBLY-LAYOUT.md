@@ -3,7 +3,7 @@
 ## 5.1 Cây thư mục runtime
 
 ```
-Assets/ApexionGame/ApexionGame.Entities.Stats/
+Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats/
 ├── ApexionGame.Entities.Stats.asmdef
 ├── AssemblyInfo.cs
 ├── SkipSourceGeneratorsForAssemblyAttribute.cs

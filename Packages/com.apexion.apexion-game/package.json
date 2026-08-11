@@ -1,0 +1,25 @@
+{
+  "name": "com.apexion.apexion-game",
+  "displayName": "Apexion Game",
+  "version": "0.1.0",
+  "unity": "6000.3",
+  "dependencies": {
+    "com.laicasaane.encosy-tower": "0.1.7-preview.3",
+    "com.unity.burst": "1.8.29",
+    "com.unity.collections": "2.6.8",
+    "com.unity.mathematics": "1.3.3"
+  },
+  "description": "Apexion Games' shared engine layer built on EncosyTower: HFSM core utilities and a DOTS-free fork of Entities.Stats.",
+  "keywords": [
+    "framework",
+    "game",
+    "apexion"
+  ],
+  "samples": [
+    {
+      "displayName": "ApexionGame.Core.Samples",
+      "description": "HFSM usage sample",
+      "path": "Samples~/ApexionGame.Core.Samples"
+    }
+  ]
+}

@@ -152,7 +152,7 @@ Bảng kiểu thay đổi gần như không bao giờ sau khi chốt profile. M�
 ### Chốt: dùng UnityCodeGen, giữ 2 cải tiến
 
 ```
-Assets/ApexionGame/ApexionGame.Entities.Stats/Generators/
+Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats/Generators/
 ├── StatTypeTable.cs                       # ★ bảng kiểu — NGUỒN DUY NHẤT (C# thuần, không JSON)
 ├── StatVariantTypeGenerator.cs            → ../Common/StatVariantType.gen.cs
 ├── StatVariantGenerator.cs                → ../Common/StatVariant.gen.cs
