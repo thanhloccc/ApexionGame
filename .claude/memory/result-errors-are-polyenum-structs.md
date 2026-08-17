@@ -14,11 +14,15 @@ stay legal only for states, modes, flags and categories that are never returned 
 *what* the state actually was, *how much* was short. The PolyEnum shape keeps that payload while
 staying unmanaged and Burst-friendly, and produces a real message instead of a symbol name.
 
-**How to apply:** copy the shape from `Assets/Game/Game.Gameplay/Player/Common/PlayerError.cs`
-(also conforming: `WeaponError`, `EquipmentError`). Call sites use generated factories **with
-parentheses** — `PlayerError.UnknownDefinition(skillId)`.
-`Game.Data/Persistence/Player/PlayerPersistenceError` is the remaining legacy flat enum: do not copy
-it, migrate it when that surface is next touched. Full rules, case/payload guidance and the
+**How to apply:** copy the shape from
+`Packages/com.apexion.apexion-game/ApexionGame.Core/HFSM/MachineError.cs` — including its
+`ToFixedString()`, which keeps logging and Burst callers allocation-free. Its call sites are in
+`MachineBuilder`2+Validate.cs` and its tests in `ApexionGame.Tests.EditorMode`. Call sites use
+generated factories **with parentheses** — `MachineError.UnknownState(ordinal)`. `*Error` types
+inside `EncosyTower.Core` predate this rule and are not a precedent. (Earlier notes pointed at
+`Assets/Game/…/PlayerError.cs`, `WeaponError`, `EquipmentError` and a legacy
+`PlayerPersistenceError` — none of those files exist; see [[gameplay-assembly-map]].)
+Full rules, case/payload guidance and the
 pre-handoff audit commands: `.claude/skills/encosy-tower/references/structured-errors.md`.
 PolyEnum factories are source-generated, so verify through a Unity compile
 ([[unity-tooling-is-cli-not-mcp]]), not the IDE — related: [[encosy-sourcegen-requires-partial]],

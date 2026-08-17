@@ -1,6 +1,6 @@
 ---
 name: encosy-tower
-description: REQUIRED for any feature work in this Unity project. Carries the doc-first gate — a feature request produces a design doc for review, and code starts only when the user explicitly asks to implement. Also the guide to EncosyTower, this project's standard library: consult it BEFORE writing any runtime, editor, or infrastructure C#. Use when implementing ANY feature — events/messaging, request-response, save/load, game data tables, UI screens & popups, MVVM data binding, object pooling, service locator, asset loading (Addressables/Resources), localization, settings, logging, IDs/enums/newtypes/unions, in-game cheat console, or editor tooling — to decide which EncosyTower module replaces hand-rolled code. ALSO required whenever code declares a collection or does math (performance defaults: FasterList/ArrayMap/ArraySet over List/Dictionary/HashSet, Shared*/Native for jobs, Unity.Mathematics over Mathf/Vector3), whenever a method can fail and returns Result/Option (error contracts are PolyEnumStruct unions, never flat enums), and whenever a file, folder, namespace, assembly, or type is created or renamed (structure & naming defaults copied from EncosyTower). Triggers on "implement", "optimize", "performance", "job", "Burst", "refactor", "rename", "error", "Result", "validation", "folder structure", "asmdef", "namespace", and Vietnamese phrasing: "làm chức năng", "viết hệ thống", "thêm feature", "tạo màn hình", "lưu game", "bắn event", "tối ưu", "xử lý lỗi", "cấu trúc thư mục", "đặt tên", "tách code".
+description: REQUIRED for any feature work in this Unity project. Carries the doc-first gate — a feature request produces a design doc for review, and code starts only when the user explicitly asks to implement. Also the guide to EncosyTower, this project's standard library: consult it BEFORE writing any runtime, editor, or infrastructure C#. Use when implementing ANY feature — events/messaging, request-response, save/load, game data tables, UI screens & popups, MVVM data binding, object pooling, service locator, asset loading (Addressables/Resources), localization, settings, logging, IDs/enums/newtypes/unions, in-game cheat console, or editor tooling — to decide which EncosyTower module replaces hand-rolled code. ALSO required whenever code declares a collection or does math (performance defaults: FasterList/ArrayMap/ArraySet over List/Dictionary/HashSet, Shared*/Native for jobs, Unity.Mathematics over Mathf/Vector3), whenever a method can fail and returns Result/Option (error contracts are PolyEnumStruct unions, never flat enums), and whenever a file, folder, namespace, assembly, or type is created or renamed (structure & naming defaults copied from EncosyTower). ALSO covers this studio's own modules layered on top — the HFSM state machine in `ApexionGame.Core` (use it, never hand-roll an FSM) and the DOTS-free `ApexionGame.Entities.Stats` fork. Triggers on "implement", "optimize", "performance", "job", "Burst", "refactor", "rename", "error", "Result", "validation", "folder structure", "asmdef", "namespace", "state machine", "FSM", "HFSM", "stats", "modifier", and Vietnamese phrasing: "làm chức năng", "viết hệ thống", "thêm feature", "tạo màn hình", "lưu game", "bắn event", "tối ưu", "xử lý lỗi", "cấu trúc thư mục", "đặt tên", "tách code", "máy trạng thái", "chỉ số".
 ---
 
 # EncosyTower — apply before hand-rolling
@@ -22,10 +22,11 @@ review, and stop. Code starts only when the user explicitly asks to implement.
 
 Four phases (full detail in `references/planning-workflow.md`):
 
-0. **Load the right skills first, and say which.** Pure C# → `encosy-tower`. Anything touching
-   Unity assets, scenes, prefabs, inspector wiring, editor windows, tests or builds →
-   `encosy-tower` + `unity-cli-workflow`. If a skill the task genuinely needs does not exist, say so
-   before starting instead of improvising around the gap.
+0. **Load the right skills first, and say which.** **Every feature: `encosy-tower` +
+   `system-design`** — the second carries the design gate and is not optional. Add
+   `unity-cli-workflow` for anything touching Unity assets, scenes, prefabs, inspector wiring,
+   editor windows, tests or builds; `coding-standards` once C# is being written. If a skill the task
+   genuinely needs does not exist, say so before starting instead of improvising around the gap.
 1. **Ask clarifying questions** (`AskUserQuestion`, ≤4 per round, one or two rounds, recommended
    option first). Push hardest on **what the expected output concretely looks like** — the more
    sharply the user can picture it while planning, the fewer wrong turns later. Never ask what the
@@ -34,6 +35,8 @@ Four phases (full detail in `references/planning-workflow.md`):
    `X.md` + `X.vi.md` in the same turn. `<Topic> - Overview.md` opens with **Request summary →
    Expected output → Steps**, then status, goals/non-goals, **Encosy mapping**, **data model with
    the collection chosen per type**, **exact folder/namespace/file layout**, API surface, decisions.
+   **Plus the `system-design` gate — decomposition, state ownership table, communication, rejected
+   alternatives, and (when the feature has a performance dimension) the chosen performance tier.**
    Steps are a dependency-ordered table, each row one action with a verifiable done-condition and
    the exact files it touches. Completeness test: **could a fresh session with no memory of this
    conversation execute it from the file alone?**
@@ -54,6 +57,10 @@ Doc naming, aspect vocabulary, required sections, bilingual rules, file template
 
 ## Workflow (once implementation is approved)
 
+0. **Check the studio's own modules first** — `references/first-party-modules.md`. A state machine is
+   `ApexionGame.Core/HFSM` (EncosyTower has no FSM module); stats are the DOTS-free
+   `ApexionGame.Entities.Stats` fork. Reaching past these into EncosyTower, or hand-rolling, is the
+   wrong move.
 1. **Match** the request against the decision matrix below.
 2. **Verify the gate** — the module may be compiled out. Check `references/setup.md` for the
    define symbol / package / asmdef reference it needs. If the gate is off, say so and give the
@@ -71,8 +78,12 @@ If two modules overlap (e.g. PubSub vs Processing), pick using the "vs" notes in
 
 ## Decision matrix
 
+Rows marked 🏠 are **this studio's own modules**, not EncosyTower — check them before the rest.
+
 | You are implementing… | Use | Namespace |
 |---|---|---|
+| 🏠 A state machine — AI brain, character controller, game/UI flow, anything with states | **HFSM** — `HierarchicalStateMachine<TContext,TState>.Define(name)`, `StateBehaviour<TContext>`, `MachineRunner`. EncosyTower has **no** FSM module → `references/first-party-modules.md` | `ApexionGame.HFSM` |
+| 🏠 Character/unit stats, modifiers, stat observers | **Entities.Stats fork** (DOTS-free) — `StatBuffer<T>`, `StatBufferLookup<T>`, `StatOwnerHandle` | `ApexionGame.Entities.Stats` |
 | Events, decoupled notifications, fire-and-forget | **PubSub** — `GlobalMessenger`, `Messenger` | `EncosyTower.PubSub` |
 | Request → response, one handler, needs a return value | **Processing** — `GlobalProcessor`, `ProcessHub` | `EncosyTower.Processing` |
 | Service locator / singleton registry / cross-scene handoff | **Vaults** — `GlobalObjectVault`, `GlobalValueVault<T>`, `SingletonVault<T>` | `EncosyTower.Vaults` |
@@ -96,7 +107,7 @@ If two modules overlap (e.g. PubSub vs Processing), pick using the "vs" notes in
 | One ID that can be several kinds (Hero \| Enemy \| Item) | **UnionIds** — `[UnionId]`, `[UnionIdKind]` | `EncosyTower.UnionIds` |
 | Fast/alloc-free enum `ToString`, `TryParse`, flag ops | **EnumExtensions** — `[EnumExtensions]`, `[EnumExtensionsFor]` | `EncosyTower.EnumExtensions` |
 | Composing one enum from several enums (modular content) | **EnumTemplate** — `[EnumTemplate]`, `[EnumTemplateMembersFromEnum]` | `EncosyTower.EnumExtensions` |
-| A discriminated union of structs (state machine, command) | **PolyEnumStructs** — `[PolyEnumStruct]` | `EncosyTower.PolyEnumStructs` |
+| A discriminated union of structs (a command, an event payload, a case union). **Not a state machine** — that is HFSM, first row | **PolyEnumStructs** — `[PolyEnumStruct]` | `EncosyTower.PolyEnumStructs` |
 | Interning strings to integer IDs (Burst-safe) | **StringIds** — `StringId`, `StringVault`, `GlobalStringVault`, `UnmanagedString` | `EncosyTower.StringIds` |
 | Lightweight handles / instance IDs | **Ids** — `Id`, `Id2`, `Id3`, `Id<T>` | `EncosyTower.Ids` |
 | Runtime type lookup, AOT-safe type cache, `typeof` → int | **Types** — `TypeId`, `TypeId<T>`, `TypeInfo`, `RuntimeTypeCache` | `EncosyTower.Types` |
@@ -214,9 +225,10 @@ Full rules, the folder→namespace evidence table, and a worked layout for `Game
 
 - **Never use a flat `enum` as `TError` in `Result<T, TError>`.** Model gameplay/domain failures with
   a `[PolyEnumFactoryFor]` wrapper over a `[PolyEnumStruct]` case union: an `Undefined` case,
-  `FixedString512Bytes` messages, `Prefix(...)`, typed immutable payloads. Call sites use generated
-  factories — `PlayerError.UnknownDefinition(skillId)`, with parentheses. Audit every touched
-  `*Error` type before handoff. Full shape and checklist: `references/structured-errors.md`.
+  `FixedString512Bytes` messages, `Prefix(...)`, `ToFixedString()`, typed immutable payloads. Call
+  sites use generated factories — `MachineError.UnknownState(ordinal)`, with parentheses. Reference
+  implementation: `ApexionGame.Core/HFSM/MachineError.cs`. Audit every touched `*Error` type before
+  handoff. Full shape and checklist: `references/structured-errors.md`.
 - Any type carrying an EncosyTower source-gen attribute **must be `partial`**. `[ObservableProperty]`
   properties must have `get => Get_X(); set => Set_X(value);` bodies — the generator supplies both,
   plus the `_x` backing field.
@@ -232,6 +244,9 @@ Full rules, the folder→namespace evidence table, and a worked layout for `Game
 
 ## References (read on demand)
 
+- `references/first-party-modules.md` — **read before the module map.** The studio's own layers:
+  the HFSM in `ApexionGame.Core`, the DOTS-free stats fork, the assembly inventory, and the current
+  (empty) state of `Assets/Game/`.
 - `references/module-map.md` — every module, its assembly, gate, and what it actually contains.
 - `references/recipes.md` — verified copy-ready patterns for PubSub, Processing, Vaults, Pooling,
   PageFlows, MVVM, Databases, Persistences, Keys, Settings, Logging, source-gen attributes.
@@ -253,3 +268,35 @@ Full rules, the folder→namespace evidence table, and a worked layout for `Game
 
 Samples are the best ground truth: `Packages/com.laicasaane.encosy-tower/Samples~/`
 (Data, MonoPages, Mvvm, Persistence, Pooling, PubSub, Stats, VisualDebugging).
+
+## See also — the portable `midcore-*` skills
+
+This skill owns **which module, which type, which name, which file**. The `midcore-*` set owns the
+scale concerns layered on top, and reads `.claude/project-profile.md` to find its way back here.
+
+| Load instead / as well when the question is | Skill |
+|---|---|
+| Where an assembly goes, which way it may point, how to break a cycle | `midcore-assembly-architecture` |
+| Content table and id design, import validation, cross-table integrity | `midcore-data-pipeline` |
+| Changing a type that is persisted to a player's device | `midcore-save-migration` |
+| What is worth testing, and what counts as verified | `midcore-testing` |
+| Frame/memory budgets, profiling, and evidence for a performance claim | `midcore-perf-budget` |
+| Release gates, build reproducibility, symbols | `midcore-release-pipeline` |
+| Remote config, events, telemetry, kill switches | `midcore-live-ops` |
+
+And the craft layer, all project-level:
+
+| The question | Skill |
+|---|---|
+| **How this feature is shaped — decomposition, state ownership, communication, performance tier** | **`system-design` — load it on EVERY feature request, alongside this one** |
+| How the C# is written — formatting, API design, attributes, comments | `coding-standards` (it owns `CODING-CONVENTIONS.md`) |
+| Changing the structure of code that already works | `refactoring` |
+| Working out why something is broken | `debugging` |
+
+`system-design` overlaps this skill's triggers deliberately. Split: **this skill answers *which
+module*; `system-design` answers *what shape*.** Picking the wrong module is fixable; splitting state
+wrongly is a rewrite.
+
+They deliberately do not name EncosyTower — they defer here through the profile's
+`authority_skills.structure_naming`. So a `midcore-*` skill saying "use the project's typed-id
+mechanism" means `[WrapType]`/`[WrapRecord]` from this file's matrix.

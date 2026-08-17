@@ -7,6 +7,16 @@ This file covers *where docs live, what they are called, and what goes in them*.
 them — which skills to load, the clarifying-question round, and executing the plan afterwards — is
 in `planning-workflow.md`. Read that one first when starting a feature.
 
+**Read the model doc set before writing your own:**
+`Packages/com.apexion.apexion-game/ApexionGame.Core/Documentation~/` — `HFSM - Overview`,
+`- API Surface`, `- Flows`, `- Data Model`, `- Layout`, `- Debugging`, `- Decisions`, `- Roadmap`,
+plus a `README.md` whose reading-order table says *when* to open each file. That is every rule below, done properly, on a real feature. Copy its shape and its level of
+detail.
+
+The sibling `ApexionGame.Entities.Stats/Documentation~/` is equally thorough but predates this
+convention — it uses `01-OVERVIEW.md` numbering and a `guide/` subfolder. Read it for content; do
+**not** copy its naming for a new set.
+
 ---
 
 ## 1. The gate
@@ -52,15 +62,10 @@ Assets/Game/Game.Gameplay/
 ├── Game.Gameplay.asmdef
 └── Documentation~/
     ├── README.md                       index — reading order, status of every feature
-    ├── README.vi.md
     ├── Combat - Overview.md
-    ├── Combat - Overview.vi.md
     ├── Combat - Data Model.md
-    ├── Combat - Data Model.vi.md
     ├── Combat - Encosy Mapping.md
-    ├── Combat - Encosy Mapping.vi.md
-    ├── Combat - Decisions.md
-    └── Combat - Decisions.vi.md
+    └── Combat - Decisions.md
 ```
 
 If the feature spans assemblies, the doc goes in the assembly that owns the *core* of it, and the
@@ -73,13 +78,12 @@ every new topic afterwards.
 
 ## 3. Naming
 
-**`<Topic> - <Aspect>.md`** — topic first, space-hyphen-space, then aspect. Vietnamese mirror is
-the same name with `.vi.md`.
+**`<Topic> - <Aspect>.md`** — topic first, space-hyphen-space, then aspect. One file, Vietnamese.
 
 ```
-Combat - Overview.md            Combat - Overview.vi.md
-Combat - Data Model.md          Combat - Data Model.vi.md
-Native Wrappers - Contracts.md  Native Wrappers - Contracts.vi.md
+Combat - Overview.md
+Combat - Data Model.md
+Native Wrappers - Contracts.md
 ```
 
 The topic prefix repeats on every file of the set so alphabetical sort groups them. Never drop it,
@@ -173,11 +177,11 @@ hiding a real fork.
 Head of every file:
 
 ```markdown
-# Combat — Overview
+# Combat — Tổng quan
 
-*[Tiếng Việt](Combat - Overview.vi.md) · [Index](README.md)*
+*[Data Model](Combat - Data Model.md) · [Index](README.md)*
 
-## Status
+## Trạng thái
 
 | | |
 |---|---|
@@ -189,21 +193,22 @@ Head of every file:
 | Open decisions | DEC-003 |
 ```
 
-- H1 uses an em dash (`Combat — Overview`); the **file name** uses a plain hyphen
-  (`Combat - Overview.md`). Both observations come from the reference doc set.
-- Second line is the language switch plus index link, in italics, separated by `·`.
+- H1 uses an em dash (`Combat — Tổng quan`); the **file name** uses a plain hyphen and keeps its
+  English aspect (`Combat - Overview.md`) so the set sorts together. Aspect names in file names stay
+  English; headings and prose are Vietnamese.
+- Second line links the sibling docs plus the index, in italics, separated by `·`.
 - Numbered `##` sections (`## 1. Goals`, `## 2. Non-goals`, …) so they can be cited as
   "Combat - Overview §3".
 - Tables over prose for anything enumerable. Code blocks are fenced with the language.
 - Same style rules as code comments in `CODING-CONVENTIONS.md` §5: say why, not what.
 
-### Bilingual rules
+### Language
 
-- `X.md` is English, `X.vi.md` is Vietnamese. Write both in the same turn.
-- Section numbering, table rows, and code blocks must match one-to-one so the two stay diffable.
+- **Vietnamese, one file.** No `.vi.md` mirror, no English twin — a second copy only drifts, and the
+  reader of these docs reads Vietnamese.
 - Code, identifiers, file paths, and `DEC-xxx` ids are **never** translated.
-- When you update one, update the other in the same edit. A `.vi.md` that has drifted is worse than
-  no `.vi.md`.
+- Skill files under `.claude/skills/` are the opposite: English only, with Vietnamese trigger phrases
+  in the `description` frontmatter.
 
 ---
 

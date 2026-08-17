@@ -20,10 +20,21 @@ Decide what kind of work this is, load the matching skills, and say which you lo
 | Compiling, running EditMode/PlayMode tests, building | `unity-cli-workflow` |
 | Anything in this repo, always | `encosy-tower` |
 
-Currently available: `encosy-tower` and `unity-cli-workflow`, both project-level in `.claude/skills/`.
-There is no dedicated dotnet/C# skill — `encosy-tower` plus `CODING-CONVENTIONS.md` covers that
-ground here. **Unity MCP is not used in this project** — `unity-cli-workflow` replaces it; see
-`AGENTS.md`.
+All skills are project-level in `.claude/skills/`. Beyond the two above:
+
+| Also load | When |
+|---|---|
+| **`system-design`** | **every feature request** — the design gate. See below |
+| `coding-standards` | writing any C#; it owns the house style document |
+| `refactoring` / `debugging` | changing existing code / investigating a failure |
+| `midcore-*` | scale concerns — architecture, data, saves, testing, perf, release, live-ops |
+
+**Unity MCP is not used in this project** — `unity-cli-workflow` replaces it; see `AGENTS.md`.
+
+**`system-design` is not optional on a feature.** It carries the design gate: the plan must state who
+owns each piece of state, how the pieces communicate, what was rejected, and — when the feature has a
+performance dimension — which performance tier was chosen and why not higher **and** not lower. A
+plan missing those is not ready for review.
 
 **If a skill the task really needs does not exist, say so before starting** rather than improvising
 around the gap. Missing skills are worth creating once and reusing, not working around each time.

@@ -1,28 +1,32 @@
 ---
 name: gameplay-assembly-map
-description: Where gameplay code lives — the Game.Common → Game.Data → Game.Gameplay dependency chain and which systems already exist
+description: Where code lives — the com.apexion.apexion-game package holds everything real; Assets/Game is empty scaffolding
 metadata:
   type: project
 ---
 
-As of 2026-08-09 the gameplay code is no longer greenfield. The chain, in dependency order:
+Verified 2026-08-15. **All first-party code lives in the embedded package
+`Packages/com.apexion.apexion-game/`**, not under `Assets/`:
 
-- `Assets/Game/Game.Common` — typed ids (`WeaponId`, `PlayerSkillId`, `EquipmentId`, …), shared
-  types (`DamageType`, `HitZone`, `AmmoType`), and the `GameStat*` facade over the stats fork.
-- `Assets/Game/Game.Data` (+ `Game.Data.Authoring`) — EncosyTower Databases tables
-  (Equipment, Player, Weapons) and Persistences (`GamePersistence`, `PlayerDataAccessor`).
-- `Assets/Game/Game.Gameplay` (+ `.Editor`, `.Tests`) — Player, Weapons, Equipment systems.
-- `Assets/Game/Game.Input`, `Packages/com.apexion.apexion-game/ApexionGame.Core` — input and shared
-  project code (the latter is now an embedded package, not under `Assets/`).
+- `ApexionGame.Core` — the **HFSM** state machine (`ApexionGame.HFSM`), phases 1–7 done.
+- `ApexionGame.Entities.Stats` (+ `.Authoring`, `.Editor`) — the DOTS-free stats fork.
+- `ApexionGame.Entities.Stats.Samples.Rts/` — one folder, two assemblies (`Rts.Core/`, `Rts.Game/`).
+- `ApexionGame.Tests.EditorMode` — the **only** first-party test assembly, EditMode only.
 
-**Why:** the first implementations have landed, so new work matches an existing pattern instead of
-inventing one. Reading the neighbouring system beats designing from scratch — and replaces the older
-"everything is empty scaffolding" assumption, which is now wrong.
+`Assets/Game/Game.Common`, `Game.Data`, `Game.Data.Authoring`, `Game.Gameplay` are **empty folders
+with no `.asmdef` and no source files**. Only `Assets/Game/Input/` (`Game.Input.asmdef`),
+`Addressables/` and `Scenes/` hold anything.
 
-**How to apply:** before extending a system, read its feature doc in
-`Assets/Game/Game.Gameplay/Documentation~/` (`Equipment System - *`, `Player System - *`) and the
-adjacent source. Place new code by the chain above — never make `Game.Common` depend upward. New
-asmdefs still need the EncosyTower references plus the copied `versionDefines` block
-(`.claude/skills/encosy-tower/references/setup.md`). Verify the current contents rather than
-trusting this list verbatim. Related: [[house-style-is-encosy-conventions]],
-[[follow-encosy-structure-and-naming]], [[apexion-entities-stats-is-dots-free-fork]].
+**Why:** an earlier version of this memory said the gameplay chain was populated with Player /
+Weapons / Equipment systems, `PlayerError.cs`, and feature docs under `Game.Gameplay/Documentation~/`.
+None of that is in the working tree, and none of it is in git history either — so pointing at it as
+"the existing pattern" sends every session chasing dead paths. Game-side gameplay is greenfield.
+
+**How to apply:** look for existing patterns in the package, not in `Assets/Game`. The reference
+`Result` error is `ApexionGame.Core/HFSM/MachineError.cs`; the model doc set is
+`ApexionGame.Core/Documentation~/HFSM - *.md`. Split new code by reusability — game-specific goes to
+`Assets/Game/…` (creating the `.asmdef` with the copied `versionDefines` block as the first act),
+anything that outlives this title goes in the package. Intended direction once those assemblies
+exist: `Game.Common` → `Game.Data` (+ `.Authoring`) → `Game.Gameplay`, never upward. Verify against
+the tree rather than trusting this list. Related: [[apexion-entities-stats-is-dots-free-fork]],
+[[follow-encosy-structure-and-naming]], [[result-errors-are-polyenum-structs]].

@@ -17,15 +17,34 @@ Plain enums stay correct for **states, modes, flags, categories** — `PlayerAct
 
 ### Ground truth in this repo
 
+Verified present on 2026-08-15.
+
 | File | Status |
 |---|---|
-| `Assets/Game/Game.Gameplay/Player/Common/PlayerError.cs` | ✅ the reference implementation — read this first |
-| `Assets/Game/Game.Gameplay/Weapons/Common/WeaponError.cs` | ✅ conforming |
-| `Assets/Game/Game.Gameplay/Equipment/Common/EquipmentError.cs` | ✅ migrated from a flat enum |
-| `Assets/Game/Game.Data/Persistence/Player/PlayerPersistenceError.cs` | ❌ **legacy flat enum** — do not copy; migrate when that surface is next touched |
-| `Packages/…/Samples~/EncosyTower.Samples.Persistence/Persistences/PlayerDataError.cs` | ✅ package sample |
+| `Packages/com.apexion.apexion-game/ApexionGame.Core/HFSM/MachineError.cs` | ✅ **the reference implementation — read this first.** Every case is produced by `MachineBuilder\`2+Validate.cs`, so the call sites are there too |
+| `Packages/com.apexion.apexion-game/ApexionGame.Tests.EditorMode/ApexionGame.Core/HFSM/MachineErrorTests.cs` | ✅ the expected test shape |
+| `Packages/com.laicasaane.encosy-tower/Samples~/EncosyTower.Samples.Persistence/Persistences/PlayerDataError.cs` | ✅ package sample |
 
-`Assets/Game/Game.Gameplay.Tests/Player/PlayerErrorTests.cs` shows the expected test shape.
+`MachineError` adds one member the skeleton below omits, and it is worth copying:
+
+```csharp
+[MethodImpl(MethodImplOptions.AggressiveInlining)]
+public FixedString512Bytes ToFixedString()
+    => _error.ToMessage(_prefix);
+```
+
+`ToString()` allocates; `ToFixedString()` lets a Burst-side or logging caller stay allocation-free.
+Add it to every new error wrapper.
+
+> **Stale pointers, removed.** Earlier revisions cited `Assets/Game/Game.Gameplay/…/PlayerError.cs`,
+> `WeaponError.cs`, `EquipmentError.cs`, `PlayerPersistenceError.cs` and `PlayerErrorTests.cs`.
+> **None of those files exist** — `Assets/Game/Game.*` are empty folders with no `.asmdef`, and the
+> files are absent from git history too. There is no known legacy flat-enum error left in the tree;
+> if you find one, it is new information, not the documented exception.
+
+Anything in `EncosyTower.Core` named `*Error` (`AddressableKeyError`, `ResourceKeyError`,
+`NativeRentingError`, `AtlasedSpriteKeyError`) belongs to the package, predates this rule, and is
+**not** a precedent for project code.
 
 ## Required shape
 
@@ -135,10 +154,15 @@ namespace Game.Gameplay.Feature
   design and leaks lifetimes into the error.
 - Messages are built with `FixedString512Bytes`. Managed formatting (`.ToString()`) is acceptable
   only on a cold path where `FixedString` has no direct `Append` overload — `double` is one such
-  case, see `PlayerError.InvalidTime`.
-- Call sites use the **generated factories with parentheses**: `PlayerError.Dead()`,
-  `PlayerError.UnknownDefinition(skillId)`. Enum-style member access (`PlayerError.Dead`) does not
-  exist and is a sign someone reintroduced a flat enum.
+  case. Never on a path that a job or a per-frame log can reach.
+- Call sites use the **generated factories with parentheses**: `MachineError.EmptyMachine()`,
+  `MachineError.UnknownState(ordinal)`,
+  `MachineError.TriggerQueueFull(trigger, capacity)`. Enum-style member access
+  (`MachineError.EmptyMachine` without parentheses) does not exist, and seeing it is the tell that
+  someone reintroduced a flat enum.
+- **Keep validation in one place.** `MachineError`'s thirteen cases are all produced by a single
+  `MachineBuilder`2+Validate.cs`, which makes the error surface auditable in one read. Do that for
+  new error types too rather than scattering factories across the module.
 - Add `.Prefix(nameof(Operation))` at boundaries where the failing operation is otherwise ambiguous.
 
 ## Validation before handoff
@@ -152,14 +176,26 @@ Cover with tests:
 5. any transaction/rollback behaviour tied to the error.
 
 **Compile through Unity** — PolyEnum factories are source-generated, so IDE analysis proves nothing.
-Use `unity-cli-workflow` for that compile and for running the tests.
-
-Audit the touched scope before reporting done:
+Use `unity-cli-workflow` for that compile and for running the tests:
 
 ```powershell
-rg -n "enum\s+\w*Error\b" Assets/Game -g '*.cs'
-rg -n "Result<.*\w+Error" Assets/Game -g '*.cs'
-rg -n "Error\.[A-Za-z0-9_]+(?!\()" Assets/Game -g '*.cs' --pcre2
+unity test . --mode EditMode --non-interactive --filter "<YourErrorTests>" `
+    --output "<scratchpad>/editmode-results.xml"
+```
+
+Audit the touched scope before reporting done. Scope the search to the assemblies that actually hold
+first-party code — `Packages/com.apexion.apexion-game` today, plus `Assets/Game` once it has any:
+
+```powershell
+# 1. a flat enum whose name ends in Error — the violation itself
+rg -n "enum\s+\w*Error\b" Packages/com.apexion.apexion-game Assets/Game -g '*.cs'
+
+# 2. every Result<,> that carries an error type — check each TError is a PolyEnum wrapper
+rg -n "Result<[^>]*\w+Error" Packages/com.apexion.apexion-game Assets/Game -g '*.cs'
+
+# 3. enum-style member access on an error type — the tell that a flat enum came back.
+#    Expect noise from field access (`_error.ToMessage`); read the hits, do not just count them.
+rg -n "\b[A-Z]\w*Error\.[A-Za-z_]\w*(?!\()" Packages/com.apexion.apexion-game Assets/Game -g '*.cs' --pcre2
 ```
 
 Review every hit inside what you touched. **An existing unrelated legacy violation never authorizes

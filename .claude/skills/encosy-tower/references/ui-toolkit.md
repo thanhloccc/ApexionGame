@@ -12,9 +12,10 @@ Two independent reasons are recorded in the code:
 
 - **Editor UI** — a `VisualElement` subclass is reusable, unit-addressable, and gets USS class-name
   constants, which UXML cannot express as strongly.
-- **Runtime UI** — `Packages/com.apexion.apexion-game/Samples~/ApexionGame.Entities.Stats.Samples.Rts/Rts.Game/Hud/RtsWidgets.cs` states it outright: *"A UXML
-  asset's main-object id is content-derived, so a hand-authored scene cannot reference one reliably
-  — and the scene here is hand-authored precisely so it stays readable in a diff."*
+- **Runtime UI** — `Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats.Samples.Rts/Rts.Game/Hud/RtsWidgets.cs`
+  states it outright: *"A UXML asset's main-object id is content-derived, so a hand-authored scene
+  cannot reference one reliably — and the scene here is hand-authored precisely so it stays readable
+  in a diff."*
 
 **So: do not create UXML.** Build the tree in C#. Only reach for UXML if a designer will edit the
 layout in UI Builder, and say why.
@@ -39,9 +40,13 @@ ApexionGame.Entities.Stats.Editor/
 ```
 
 Runtime UI drops the `StyleSheets/` folder when it styles inline —
-`Packages/com.apexion.apexion-game/Samples~/ApexionGame.Entities.Stats.Samples.Rts/Rts.Game/Hud/` holds `RtsHud.cs`, one file per panel
-(`RtsTopBar`, `RtsSpellBar`, `RtsJournalPanel`, …), plus `RtsHudTheme.cs`, `RtsWidgets.cs`, and
-`Ui/RtsPanelSettings.asset`.
+`Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats.Samples.Rts/Rts.Game/Hud/` holds
+`RtsHud.cs`, one file per panel (`RtsTopBar`, `RtsSpellBar`, `RtsJournalPanel`, `RtsCommandPanel`,
+`RtsGraphPanel`, `RtsInspectorPanel`, …), plus `IRtsHudHost.cs`, `RtsHudTheme.cs`, `RtsWidgets.cs`,
+and `Ui/RtsPanelSettings.asset`.
+
+Both reference implementations are in the embedded package, **not** under `Samples~/` — that folder
+holds only `ApexionGame.Core.Samples`.
 
 - `Views/` and `StyleSheets/` are in the approved sub-folder vocabulary and **add no namespace
   segment** — `Views/StatDebuggerView.cs` is still `ApexionGame.Entities.Stats.Editor`.

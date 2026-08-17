@@ -29,6 +29,25 @@ namespace Game.Whatever
 #endif
 ```
 
+Alias one name per **returned type**, not just one per task. `UnityTask` is the void-ish task;
+declare a further alias for each generic result you return, named after what it carries:
+
+```csharp
+#if UNITASK
+    using UnityTask      = Cysharp.Threading.Tasks.UniTask;
+    using UnityTaskBool  = Cysharp.Threading.Tasks.UniTask<bool>;
+    using UnityTaskVault = Cysharp.Threading.Tasks.UniTask<PlayerPersistence.ReadOnlyPersistence>;
+#else
+    using UnityTask      = UnityEngine.Awaitable;
+    using UnityTaskBool  = UnityEngine.Awaitable<bool>;
+    using UnityTaskVault = UnityEngine.Awaitable<PlayerPersistence.ReadOnlyPersistence>;
+#endif
+```
+
+That is where the `UnityTaskVault` in the Persistences recipe below comes from — it is not a package
+type, just this file's alias for `UniTask<ReadOnlyPersistence>`. `Awaitable` has no implicit
+conversions, so the alias is what keeps both backends compiling from one signature.
+
 Helpers: `UnityTasks.GetCompleted()`, `UnityTasks.GetCompleted<T>(value)`,
 `UnityTasks.NextFrameAsync(token)`, `UnityTasks.WaitUntil(state, predicate, token)`,
 `UnityTasks.WhenAll(tasks, count)`, `task.Forget()`, `await task.SuppressCancellationThrow()`.

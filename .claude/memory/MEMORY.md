@@ -10,7 +10,9 @@
 - [Unity tooling is the CLI, not MCP](unity-tooling-is-cli-not-mcp.md) — Unity CLI + Pipeline; `unity-mcp-skill` is deliberately out of use.
 - [Which EncosyTower modules are live in this project](encosy-modules-live-in-project.md) — Entities/DOTS ones are compiled out; everything else is on.
 - [ApexionGame.Entities.Stats is a DOTS-free fork](apexion-entities-stats-is-dots-free-fork.md) — do not "fix" it by adding Unity.Entities.
-- [Gameplay assembly map](gameplay-assembly-map.md) — Game.Common → Game.Data → Game.Gameplay; no longer greenfield, read the neighbouring system first.
+- [Gameplay assembly map](gameplay-assembly-map.md) — everything real is in the `com.apexion.apexion-game` package; `Assets/Game` is empty scaffolding.
 - [House style is CODING-CONVENTIONS.md](house-style-is-encosy-conventions.md) — EncosyTower's own guide governs all C# here.
 - [EncosyTower source generators require `partial`](encosy-sourcegen-requires-partial.md) — the #1 cause of "generated method not found".
 - [UI is C# VisualElements, never UXML](ui-is-csharp-not-uxml.md) — 27 `.uss` vs 1 `.uxml`; the reason is recorded in RtsWidgets.
+- [The midcore-* skills read project-profile.md](midcore-skills-read-project-profile.md) — seven portable skills; repo facts live in one profile, never inside a skill.
+- [Design gate on every feature](design-gate-on-every-feature.md) — state ownership, communication, rejected alternatives, perf tier; not optional.

@@ -24,7 +24,16 @@ X            X.Authoring       X.Editor       X.Tests       X.Samples
 
 The package does this (`EncosyTower.Databases.Authoring`, `EncosyTower.Editor.Mvvm`,
 `EncosyTower.Tests.PlayMode`) and so does this project
-(`ApexionGame.Entities.Stats{,.Authoring,.Editor,.Tests,.Samples}`).
+(`ApexionGame.Entities.Stats`, `.Authoring`, `.Editor`).
+
+Two existing exceptions — match them rather than "fixing" them:
+
+- **Tests are centralised.** All first-party tests live in `ApexionGame.Tests.EditorMode`, not in one
+  `*.Tests` sibling per assembly. A new test goes there unless the user asks for a new assembly.
+- **The RTS sample is one folder, two assemblies.**
+  `ApexionGame.Entities.Stats.Samples.Rts/` contains `Rts.Core/` and `Rts.Game/`, whose asmdefs are
+  named `ApexionGame.Entities.Stats.Samples.Rts.Core` / `.Game`. So the folder-name-equals-assembly-
+  name rule holds at the asmdef's own folder, not at the grouping folder above it.
 
 Editor code that is *too small* to justify its own assembly stays in the runtime assembly but must:
 live in a folder prefixed `Editor`, be wrapped whole in `#if UNITY_EDITOR`, use an
@@ -211,9 +220,18 @@ For `MonoBehaviour` / `ScriptableObject`, serialized fields come first:
 
 ## 9. Applying this to Land of Souls
 
-Gameplay assemblies are `Assets/Game/Game.Common` and `Assets/Game/Game.Gameplay`; shared
-project code is `Packages/com.apexion.apexion-game/ApexionGame.Core`. Assembly name = `rootNamespace` = folder name
-in each.
+Shared project code is the embedded package `Packages/com.apexion.apexion-game/` —
+`ApexionGame.Core` (HFSM) and `ApexionGame.Entities.Stats`. That is where the working examples are;
+see `first-party-modules.md`.
+
+Game-side code goes in `Assets/Game/`, where `Game.Common/`, `Game.Data/`,
+`Game.Data.Authoring/` and `Game.Gameplay/` currently exist as **empty folders with no `.asmdef`**.
+So the layout below is the target, not something to read off disk — creating the first file in one
+of those folders also means creating its `.asmdef` (name = `rootNamespace` = folder name) with the
+`EncosyTower.Core` reference and the copied `versionDefines` block (`setup.md`).
+
+Deciding where new code goes: **game-specific → `Assets/Game/…`; reusable past this title →
+the `com.apexion.apexion-game` package.** That is the split the package was extracted to create.
 
 A new feature inside `Game.Gameplay` should look like:
 

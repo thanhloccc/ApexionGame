@@ -14,7 +14,8 @@ Where the package stores stats in ECS chunks, the fork uses `StatBuffer<T>` / `S
 `StatDebugRegistry`, `StatStoreDebug`) plus `StatTypeTable` / `StatTypeTableGenerator`. Its
 codegen define is `APEXION_STAT_VALUE_TYPES_GENERATOR` (the package's is
 `ENCOSY_STAT_VALUE_TYPES_GENERATOR`). Companions: `.Authoring`, `.Editor`, `.Tests`, and the
-`Samples~/ApexionGame.Entities.Stats.Samples.Rts/Rts.{Core,Game}` opt-in sample.
+`ApexionGame.Entities.Stats.Samples.Rts/Rts.{Core,Game}` sample (a top-level folder in the package,
+not under `Samples~/`).
 
 **Why:** the divergence is intentional. Treating it as drift — "syncing" it back to the package
 version, or adding `com.unity.entities` so the package assembly compiles — would undo the port.

@@ -2,6 +2,9 @@
 
 Package root: `Packages/com.laicasaane.encosy-tower` — `com.laicasaane.encosy-tower` v0.1.7-preview.3, Unity 6000.3.
 
+This file covers the **package**. The studio's own modules on top of it — the HFSM state machine and
+the DOTS-free stats fork — are in `first-party-modules.md`; check that first.
+
 ## Assemblies
 
 | Assembly | Path | Gate |
@@ -14,7 +17,13 @@ Package root: `Packages/com.laicasaane.encosy-tower` — `com.laicasaane.encosy-
 | `EncosyTower.Databases.Authoring` | `EncosyTower.Databases.Authoring/` | `UNITY_EDITOR \|\| ENCOSY_INCLUDE_AUTHORING` **and** `BAKING_SHEET` **and** `UNITY_NEWTONSOFT_JSON` |
 | `EncosyTower.Databases.Settings` | `EncosyTower.Databases.Settings/` | editor — the database import window |
 | `EncosyTower.Entities.Stats` | `EncosyTower.Entities.Stats/` | `UNITY_ENTITIES` (**not installed here** — see setup.md) |
-| `EncosyTower.Testing` | `EncosyTower.Testing/` | test utilities |
+| `EncosyTower.Testing` | `EncosyTower.Testing/` | test utilities — one type, `TestRunner` |
+| `EncosyTower.Tests.EditorMode` / `.PlayMode` | `EncosyTower.Tests.*/` | the package's own suites — read for test shape, do not add to |
+| `Unity.InternalAPIEngineBridge.017` | `Unity.InternalAPIEngineBridge.017/` | internal-API bridge; never edit |
+
+A second, separate package is also installed: `Packages/com.laicasaane.encosy-tower.dev-tools`
+(`com.laicasaane.encosy-tower.dev-tools` v0.0.1-exp.1, assembly `EncosyTower.DevTools`) — tooling for
+developing the package itself, not something game code should reference.
 
 Source generators ship as DLLs in `EncosyTower.Core/SourceGenerators/` (Generators, Analyzers,
 CodeRefactors, Formatters, Common, Helpers). They run on every assembly unless that assembly

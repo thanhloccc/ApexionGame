@@ -22,11 +22,19 @@ more sharply it can be pictured while planning, the fewer wrong turns later. Nev
 can answer or what has an obvious default.
 
 **Phase 2 — write the plan.**
+- **Design gate (`system-design`) — the plan is not ready for review without these:**
+  **Decomposition** (the pieces, and why those) · **State ownership** (a table: each piece of state →
+  its single owner → who may write it) · **Communication** (which mechanism between which pieces, and
+  why that one) · **Rejected alternatives** (at least one, with the reason). Plus, when the feature
+  runs per frame / scales with entity count / handles large data: **Performance tier** — which tier,
+  and why not higher **and** why not lower.
 - Location: `Documentation~/` of the assembly that owns the feature.
 - Naming: `<Topic> - <Aspect>.md`, topic prefix repeated on every file of the set —
   `Combat - Overview.md`, `Combat - Data Model.md`, `Combat - Encosy Mapping.md`.
-- **Bilingual**: `X.md` (English) + `X.vi.md` (Vietnamese), written in the same turn, kept
-  section-for-section in sync. Never translate code, identifiers, paths or `DEC-xxx` ids.
+- **Vietnamese only — one file, no English mirror.** Plan and feature docs are written in Vietnamese
+  (`X.md`). Do not produce `X.vi.md` mirrors and do not write an English twin: two copies only drift.
+  Never translate code, identifiers, paths or `DEC-xxx` ids.
+  Skill files are the opposite — English only, see `.claude/README.md`.
 - `<Topic> - Overview.md` opens with **Request summary → Expected output → Steps**, then status,
   goals/non-goals, **Encosy module mapping**, **data model with the collection chosen per type**,
   **exact folder/namespace/file layout**, API surface, decisions.
@@ -66,12 +74,15 @@ as a `[PolyEnumFactoryFor]` wrapper over a `[PolyEnumStruct]` case union.
 - Required: an `Undefined` case (so `default(TError).ToString()` is safe), `FixedString512Bytes`
   messages, `Prefix(...)`, typed immutable payloads (ids, states, tokens, amounts) — never strings
   where a typed id exists, never mutable objects/exceptions/Unity objects/collections.
-- Call sites use the **generated factories with parentheses**: `PlayerError.Dead()`,
-  `PlayerError.UnknownDefinition(skillId)`.
+- Call sites use the **generated factories with parentheses**: `MachineError.EmptyMachine()`,
+  `MachineError.UnknownState(ordinal)`.
+- Add `ToFixedString()` alongside `ToString()` so logging/Burst callers stay allocation-free.
 - Plain enums remain right for states, modes, flags, categories that are not error contracts.
-- Reference implementation: `Assets/Game/Game.Gameplay/Player/Common/PlayerError.cs`. Also
-  conforming: `WeaponError`, `EquipmentError`. `Game.Data/Persistence/Player/PlayerPersistenceError`
-  is the remaining **legacy flat enum** — do not copy it; migrate it when that surface is touched.
+- Reference implementation:
+  `Packages/com.apexion.apexion-game/ApexionGame.Core/HFSM/MachineError.cs`, with its call sites in
+  `MachineBuilder`2+Validate.cs` and its tests in
+  `ApexionGame.Tests.EditorMode/ApexionGame.Core/HFSM/MachineErrorTests.cs`.
+  `*Error` types inside `EncosyTower.Core` predate this rule and are not a precedent.
 - Before handoff, audit every new/touched `*Error` and `Result<T,TError>` call site, and compile
   through Unity so PolyEnum generation actually runs. Full rules and the audit commands:
   `.claude/skills/encosy-tower/references/structured-errors.md`.
@@ -123,8 +134,9 @@ hand-authored scene cannot reference one reliably.
 - Load sheets by path constants built from a module root, via `WithEditorStyleSheet(...)`; at runtime
   serialize a `StyleSheet` and use `WithStyleSheet(...)`, or style inline with a `*Theme` +
   `*Widgets` pair.
-- Reference implementations: `ApexionGame.Entities.Stats.Editor` (editor),
-  `ApexionGame.Entities.Stats.Samples/Rts.Game/Hud` (runtime).
+- Reference implementations, both under `Packages/com.apexion.apexion-game/`:
+  `ApexionGame.Entities.Stats.Editor/` (editor),
+  `ApexionGame.Entities.Stats.Samples.Rts/Rts.Game/Hud/` (runtime).
 - Full rules: `.claude/skills/encosy-tower/references/ui-toolkit.md`.
 
 ## Structure & naming defaults
@@ -166,12 +178,18 @@ Copy EncosyTower's organization. Decide placement before creating files.
 - **`Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats` is a deliberate DOTS-free fork** of
   the package's stats system. Edit it there; never "fix" it by adding Unity.Entities or syncing it to
   the package.
-- **Gameplay assemblies (verify current contents before relying on this list):**
-  `Game.Common` (ids, shared types, stat facade) → `Game.Data` (+ `.Authoring`; Databases tables,
-  Persistences) → `Game.Gameplay` (+ `.Editor`, `.Tests`; Player, Weapons, Equipment) plus
-  `Game.Input` and `ApexionGame.Core`. Existing feature docs live in
-  `Assets/Game/Game.Gameplay/Documentation~/` (`Equipment System - *`, `Player System - *`) —
-  read the matching one before extending a system.
+- **`ApexionGame.Core/HFSM` is the studio's state machine** (`ApexionGame.HFSM`). EncosyTower has no
+  FSM module — use HFSM, never hand-roll one. Phases 1–7 implemented; check `HFSM - Roadmap.md`
+  before assuming a feature exists.
+- **`Assets/Game/` is empty scaffolding** (verified 2026-08-15). `Game.Common/`, `Game.Data/`,
+  `Game.Data.Authoring/`, `Game.Gameplay/` are folders with **no `.asmdef` and no source files**;
+  only `Assets/Game/Input/` (`Game.Input.asmdef`), `Addressables/` and `Scenes/` hold anything.
+  Treat game-side gameplay as greenfield. The intended direction when those assemblies are created:
+  `Game.Common` → `Game.Data` (+ `.Authoring`) → `Game.Gameplay`, never depending upward.
+- **Tests are centralised in `ApexionGame.Tests.EditorMode`** — the only first-party test assembly,
+  and EditMode only. There is no first-party PlayMode suite.
+- **Split rule:** game-specific code → `Assets/Game/…`; anything reusable past this title →
+  the `com.apexion.apexion-game` package. That is why the package was extracted.
 - New assemblies must reference `EncosyTower.Core` **and copy the `versionDefines` block** from
   `EncosyTower.Core.asmdef`, or `#if` guards evaluate false and code silently disappears.
 - Every type carrying an EncosyTower attribute must be `partial`; generated members use the
@@ -181,12 +199,20 @@ Copy EncosyTower's organization. Decide placement before creating files.
 ## Where things live
 
 - Skill: `.claude/skills/encosy-tower/` — `SKILL.md`, plus `references/`:
-  `planning-workflow`, `feature-docs`, `module-map`, `recipes`, `collections-and-math`,
-  `structured-errors`, `structure-and-naming`, `setup`.
-- Skill: `.claude/skills/unity-cli-workflow/` — Unity CLI / Pipeline / batch mode, validation rules.
-- Skills available: `encosy-tower` and `unity-cli-workflow`, both project-level.
-- Feature docs: `Documentation~/` of the owning assembly (e.g.
-  `Assets/Game/Game.Gameplay/Documentation~/`). Existing example of the project's doc culture:
-  `Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats/Documentation~/`.
+  `first-party-modules`, `planning-workflow`, `feature-docs`, `module-map`, `recipes`,
+  `collections-and-math`, `structured-errors`, `structure-and-naming`, `ui-toolkit`, `setup`.
+- Skill: `.claude/skills/unity-cli-workflow/` — `SKILL.md` + `references/commands.md` (verified
+  `unity test` / `command` / batch-mode flags and this machine's probed state).
+- Skills available: `encosy-tower` and `unity-cli-workflow`, both project-level, plus the portable
+  `midcore-*` set at `~/.claude/skills/` (architecture, data pipeline, save migration, testing,
+  perf budget, release pipeline, live-ops).
+- **`.claude/project-profile.md`** — the verified fact sheet the `midcore-*` skills read to resolve
+  this repo's technology, conventions and authority skills. Update it there when a fact changes;
+  never copy its values into a skill.
+- Feature docs: `Documentation~/` of the owning assembly. **The model doc set is
+  `Packages/com.apexion.apexion-game/ApexionGame.Core/Documentation~/`** (`HFSM - *.md` + `.vi.md`
+  mirrors + a `README.md` reading order) — copy that. The sibling
+  `ApexionGame.Entities.Stats/Documentation~/` is thorough but uses an older `01-OVERVIEW.md`
+  numbering; read it, do not copy its naming.
 - Memory: `.claude/memory/` — index in `MEMORY.md`, one fact per file.
 - Package samples (best ground truth): `Packages/com.laicasaane.encosy-tower/Samples~/`.

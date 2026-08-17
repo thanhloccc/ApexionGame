@@ -9,8 +9,8 @@ Every UI Toolkit surface here — editor windows, inspectors, settings pages, ru
 assembled in C# as `VisualElement` subclasses. EncosyTower ships 27 `.uss` files and exactly one
 `.uxml` (and that one exists only because Unity's Project Settings resources force it).
 
-**Why:** `Packages/com.apexion.apexion-game/Samples~/ApexionGame.Entities.Stats.Samples.Rts/Rts.Game/Hud/RtsWidgets.cs` records
-it — a UXML asset's main-object id is content-derived, so a hand-authored scene cannot reference one
+**Why:** `Packages/com.apexion.apexion-game/ApexionGame.Entities.Stats.Samples.Rts/Rts.Game/Hud/RtsWidgets.cs`
+records it — a UXML asset's main-object id is content-derived, so a hand-authored scene cannot reference one
 reliably. Scenes in this project are hand-authored so they stay readable in a diff, which rules UXML
 out. Editor-side, a `VisualElement` subclass also gets reusable USS class-name constants that UXML
 cannot express.

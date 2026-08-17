@@ -1,7 +1,10 @@
 # EncosyTower in *this* project — what is live, what is not
 
 Verified against `Packages/manifest.json`, `ProjectSettings/ProjectSettings.asset` and every
-`.asmdef` on 2026-08-07. Re-check if the manifest changes.
+`.asmdef` on 2026-08-15. Re-check if the manifest changes.
+
+For the studio's **own** modules — the HFSM in `ApexionGame.Core`, the stats fork, and the current
+state of `Assets/Game/` — see `first-party-modules.md`.
 
 ## Module availability right now
 
@@ -33,14 +36,29 @@ that make them meaningful are not installed — they are leftovers, not a signal
   `Debugging/` (`StatDebugInfo`, `StatDebugRegistry`, `StatStoreDebug`) plus
   `StatTypeTable`/`StatTypeTableGenerator`.
   **Do not "fix" it by pulling in the package version or adding Unity.Entities.**
-  Companion assemblies: `.Authoring`, `.Editor`, `.Tests`, `.Samples/Rts.{Core,Game,Tests}`.
+  Companion assemblies: `.Authoring`, `.Editor`, and the RTS sample folder
+  `ApexionGame.Entities.Stats.Samples.Rts/` holding `Rts.Core/` + `Rts.Game/`. Tests live in the
+  shared `ApexionGame.Tests.EditorMode`, not a `.Tests` sibling.
   Its generator define is `APEXION_STAT_VALUE_TYPES_GENERATOR` (Standalone), the package equivalent
   being `ENCOSY_STAT_VALUE_TYPES_GENERATOR`.
-- Gameplay chain: `Game.Common` (ids, shared types, `GameStat*` facade) → `Game.Data` +
-  `Game.Data.Authoring` (Databases tables, Persistences) → `Game.Gameplay` + `.Editor` + `.Tests`
-  (Player, Weapons, Equipment). Plus `Game.Input` and `ApexionGame.Core`. Read the neighbouring
-  system and its doc in `Assets/Game/Game.Gameplay/Documentation~/` before adding to one; never make
-  `Game.Common` depend upward. Wire the asmdef references below before a new assembly's first file.
+- `ApexionGame.Core` — the **HFSM** module (`ApexionGame.HFSM`), the studio's state machine. Use it
+  instead of hand-rolling one; EncosyTower has no FSM module. Details in `first-party-modules.md`.
+- `ApexionGame.Tests.EditorMode` — the only first-party test assembly, and EditMode only. There is
+  no first-party PlayMode suite; say so rather than implying PlayMode coverage.
+
+### `Assets/Game/` is empty scaffolding right now
+
+`Game.Common/`, `Game.Data/`, `Game.Data.Authoring/`, `Game.Gameplay/` exist as **folders with no
+`.asmdef` and no source files**. Only `Assets/Game/Input/` (`Game.Input.asmdef`,
+`PlayerInputActions`), `Addressables/` and `Scenes/` hold anything.
+
+Earlier revisions of this file described a populated `Game.Common → Game.Data → Game.Gameplay` chain
+with Player/Weapons/Equipment systems and feature docs under `Game.Gameplay/Documentation~/`. That
+code is **not in the working tree and not in git history** — treat game-side gameplay as greenfield.
+The intended dependency direction still holds when those assemblies are created:
+`Game.Common` (ids, shared types, stat facade) → `Game.Data` + `Game.Data.Authoring` (Databases
+tables, Persistences) → `Game.Gameplay` — and `Game.Common` must never depend upward. The first file
+in any of those folders also creates the `.asmdef`, wired as below.
 
 ## Wiring a new assembly
 
@@ -99,36 +117,13 @@ installs its `[RequiresPackage]` dependencies — use it before hand-editing `ma
 - Database authoring types are `[Conditional("UNITY_EDITOR")]` / `ENCOSY_INCLUDE_AUTHORING` — keep
   authoring code in an editor-only file or assembly.
 
-## Coding conventions (digest of `CODING-CONVENTIONS.md` at repo root)
+## Coding conventions
 
-Read the full document for anything non-obvious; it is EncosyTower's own style guide and this
-repo follows it.
+**Owned by the `coding-standards` skill** — load it rather than reading anything here.
 
-- Naming: types/methods/properties PascalCase; private fields `_camelCase`; private statics
-  `s_camelCase`; public readonly fields PascalCase; `const` `ALL_UPPER`; locals camelCase.
-  Native container fields use Unity's `m_PascalCase` inside an `IDE1006` pragma pair.
-  Extensions over foreign types: `Encosy<Type>Extensions`; over own types: `<Type>Extensions`.
-  Async methods end in `Async`.
-- 4 spaces, LF, trailing newline, ≤100 cols (120 hard).
-- Opening brace on its own line. **Braces on every control block**, even single-statement `if`.
-- Blank line above and below any statement that opens a `{ }` scope, except when blocks touch by
-  design (`if`/`else`, `try`/`catch`) or the block starts/ends the parent scope.
-- Field groups in order `const` → `static readonly` → `static` → instance, one blank line between
-  groups, none within. No column alignment.
-- Multi-parameter signatures and calls wrap leading-comma style:
+`CODING-CONVENTIONS.md` at the repo root is the authoritative document (1063 lines, 14 sections).
+`coding-standards/SKILL.md` opens with a table mapping each section to whichever skill owns it, so a
+convention question is answered without reading the whole thing.
 
-  ```csharp
-  public static PersistStoreArgs GetStoreArgs<TData, TStore>(
-        Func<TData> createFunc
-      , RootPath rootPath
-      , string fileExtension
-  )
-  ```
-
-- Prefer `Option<T>` / `Result<T,TError>` over `null` and `bool`+`out` for recoverable failures;
-  exceptions are for programmer error, raised through `ThrowHelper` / `Checks`.
-- Hot paths get `[MethodImpl(MethodImplOptions.AggressiveInlining)]`; cold throw/log helpers get
-  `[MethodImpl(MethodImplOptions.NoInlining)]` plus `[HideInCallstack, StackTraceHidden]` and
-  `[Conditional(...)]` guards from `ValidationDefines`.
-- File names mirror the type, with backtick arity (`Foo\`1.cs`) and `+` for nested partials
-  (`MessagePublisher+Publisher.cs`), `.gen.cs` for generated output.
+A digest used to live here. It covered 2 of the document's 14 sections and was a third copy of rules
+that already had owners, so it was removed rather than left to drift.
